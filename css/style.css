@@ -1,0 +1,11 @@
+#text {
+  background: black;
+    position: absolute;
+    left: 50%;
+    top: 20px;
+    height: 30px;
+    width: 10%;
+    z-index: 10;
+    color: white;
+    padding: 10px;
+}
