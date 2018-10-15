@@ -6,11 +6,17 @@
     <meta charset="utf-8">
 
     <link rel="stylesheet" href="css/style.css">
-    <script src="./js/aframe-v0.8.2.js" ></script>
+
+    <script src="./js/util.js"></script>
+
+    <script src="./js/Tile.js"></script>
+
+    <!-- <script src="./js/aframe-v0.8.2.js" ></script> -->
+    <script src="./js/aframe-master.js" ></script>
 
     <script src="./js/aframeExtra.js"></script>
 
-    <script src="./js/util.js"></script>
+
 
 
 
@@ -22,10 +28,8 @@
 
 <div id="text">
     <form>
-        Lat:<br>
-        <input class="formRand" id="latPos" type="text" name="lat"><br>
-        Lon:<br>
-        <input class="formRand"  id="lonPos" type="text" name="lon"> <br>
+        Lat Lon: eg. 52.5 13.4 for Berlin<br>
+        <input class="formRand" id="latLonPos" type="text" name="lat"><br>
         <input class="formRand" id="sendPos" type="submit" value="Beam me Scotty!">
     </form>
 
@@ -36,14 +40,18 @@
 
 
 <a-scene antialias="true" background="color: #ECECEC">
+
+    <a-assets>
+    </a-assets>
     <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" shadow></a-box>
     <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" shadow></a-sphere>
      <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" shadow></a-cylinder>
-    <a-plane position="0 0 -4" rotation="-90 0 0" src="./data/42972.png" width="256" height="256" shadow></a-plane>
+
+    <!-- <a-plane position="-92.5 0 -92.5" rotation="-90 0 0" src="./data/42972.png"  width="185" height="185" ></a-plane> -->
 
     <!-- <a-box log="Hello, Box!"></a-box> -->
 
-    <a-entity id="camera" camera="active: true" look-controls wasd-controls position="0 1.6 0" data-aframe-default-camera cameralistener>
+    <a-entity id="camera" camera="active: true" look-controls wasd-controls position="0 20 0" data-aframe-default-camera cameralistener>
 
     </a-entity>
 

@@ -1,6 +1,14 @@
-const Util = {
+var Util = {
+
+  EARTH_RADIUS_IN_METERS: 6378137,
+  EARTH_CIRCUMFERENCE_IN_METERS: 6378137 * Math.PI * 2,
+
+  METERS_PER_DEGREE_LATITUDE: 6378137 * Math.PI * 2 / 360,
+  METERS_PER_DEGREE_LONGITUDE: 6378137 * Math.PI * 2 / 360,
+
   calcPos: function(position) {
-    console.log(position)
+    // console.log(position)
+    console.log(this.EARTH_CIRCUMFERENCE_IN_METERS)
 
   },
 
@@ -21,6 +29,11 @@ const Util = {
   tile2lat: function (y,z) {
   var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
   return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
+  },
+
+  getTileSizeInMeters( latitude, zoom) {
+    return 6378137 * Math.PI * 2 * Math.cos(latitude / 180 * Math.PI) /
+      Math.pow(2, zoom);
   }
 
 }

@@ -3,19 +3,29 @@ AFRAME.registerComponent('cameralistener', {
   schema: {type: 'string'},
 
   init: function () {
-    this.latLonPos = {lat: 52.545584 , lon: 13.355818};
-    this.oldPos = this.el.object3D.getWorldPosition();
-    this.newPos = this.el.object3D.getWorldPosition();
 
-    // this.el.addEventListener('componentchanged', function (evt) {
-    //   // console.log(evt)
-    //   console.log(evt.srcElement.object3D.position);
-    //   console.log(this.oldPos)
-    // }).bind(this);
+    let latLonPos = this.latLonPos = this.latLonNewPos = {lat: 52.545584 , lon: 13.355818};
+    this.metersPerLon = Util.METERS_PER_DEGREE_LATITUDE * Math.cos(this.latLonPos.lat / 180 * Math.PI);
+
+    let pos = this.oldPos = this.newPos = this.el.object3D.getWorldPosition();
+    this.tile = new Tile(pos.x, pos.z, 17, latLonPos.lat, latLonPos.lon);
 
     this.el.addEventListener('componentchanged', (evt) => {
       this.newPos = this.el.object3D.getWorldPosition();
-      console.log(this.calcLatLonFromWorld(this.newPos));
+      // x is longitude und z is latitude
+      let lonDifference = 1/this.metersPerLon*this.newPos.x;
+      let latDifference = 1/Util.METERS_PER_DEGREE_LATITUDE*this.newPos.z*-1;
+
+      this.latLonNewPos = { lat: (this.latLonPos.lat+latDifference), lon: (this.latLonPos.lon+lonDifference)};
+
+      changeCoordinatesDisplay([Math.round(this.latLonNewPos.lon*10000)/10000, Math.round(this.latLonNewPos.lat*10000)/10000]);
+
+      var tile1 = Util.long2tile(this.latLonNewPos.lon,17);
+      var tile2 = Util.lat2tile(this.latLonNewPos.lat,17);
+
+      console.log(tile1, tile2 )
+      console.log(Util.tile2long(tile1,17), Util.tile2lat(tile2, 17))
+
     });
   },
 
@@ -35,17 +45,28 @@ AFRAME.registerComponent('cameralistener', {
     // console.log(this.el.object3D.getWorldPosition(position));
     // console.log(this.el.object3D.getWorldRotation(rotation));
     // position and rotation now contain vector and euler in world space.
-  },
-
-  calcLatLonFromWorld: function(position) {
-
-    /*
-    use the quick and dirty estimate that 111,111 meters (111.111 km) in the y direction is 1 degree (of latitude) and
-    111,111 * cos(latitude) meters in the x direction is 1 degree (of longitude).
-     */
-
-
-    return position;
   }
 
 });
+
+
+/*
+ onload: this.metersPerLon = METERS_PER_DEGREE_LATITUDE * Math.cos(this.latitude / 180 * Math.PI);
+
+(this.longitude - APP.position.longitude) * this.metersPerLon,
+(APP.position.latitude-this.latitude) * METERS_PER_DEGREE_LATITUDE,
+
+
+ (aktuelle long minus gegebene Long) * originale(this.metersPerLon)
+ (aktuelle lat minus gegebene lat) * METERS_PER_DEGREE_LATITUDE
+
+
+
+ */
+
+
+// this.el.addEventListener('componentchanged', function (evt) {
+//   // console.log(evt)
+//   console.log(evt.srcElement.object3D.position);
+//   console.log(this.oldPos)
+// }).bind(this);

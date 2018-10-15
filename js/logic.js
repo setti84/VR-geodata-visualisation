@@ -1,19 +1,15 @@
 
 
-const posLat = document.getElementById('latPos');
-const posLon = document.getElementById('lonPos');
+const latLonPos = document.getElementById('latLonPos');
 const sendPos = document.getElementById('sendPos');
-const disPos = document.getElementById('texPosi');
 
-
-// var searchThis = posLat.textContent || posLat.innerText;
 
 sendPos.addEventListener("click", function(event){
   event.preventDefault()
-  console.log(posLat.value)
-  console.log(posLon.value)
-  disPos.innerText = "Camera Position: " + posLat.value + " " + posLon.value + " ";
-  console.log(disPos.innerText)
+  //let pos = latLonPos.value.split(" ");
+  changeCoordinatesDisplay(latLonPos.value.split(" "))
+
+
 
   const camera = document.querySelector('a-entity[cameralistener]');
   Util.calcPos("hello");
@@ -21,6 +17,13 @@ sendPos.addEventListener("click", function(event){
 
 
 // --------------------------------------------------
+
+function changeCoordinatesDisplay(position) {
+  document.getElementById('texPosi').innerText = "Camera Position: " + position[0] + " "  + position[1];
+}
+
+
+
 
 
 /*
