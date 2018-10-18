@@ -7,12 +7,20 @@
 
     <link rel="stylesheet" href="css/style.css">
 
+
+    <script src="./js/constants.js"></script>
     <script src="./js/util.js"></script>
 
-    <script src="./js/Tile.js"></script>
+    <script src="./js/latLng.js"></script>
+    <script src="./js/tile.js"></script>
+
 
     <!-- <script src="./js/aframe-v0.8.2.js" ></script> -->
+
+
     <script src="./js/aframe-master.js" ></script>
+
+
 
     <script src="./js/aframeExtra.js"></script>
 
@@ -39,19 +47,18 @@
 </div>
 
 
-<a-scene antialias="true" background="color: #ECECEC">
+<a-scene background="color: #ECECEC">
 
     <a-assets>
     </a-assets>
-    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" shadow></a-box>
-    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" shadow></a-sphere>
-     <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" shadow></a-cylinder>
+    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" ></a-box>
+    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" ></a-sphere>
+     <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" ></a-cylinder>
 
     <!-- <a-plane position="-92.5 0 -92.5" rotation="-90 0 0" src="./data/42972.png"  width="185" height="185" ></a-plane> -->
 
-    <!-- <a-box log="Hello, Box!"></a-box> -->
 
-    <a-entity id="camera" camera="active: true" look-controls wasd-controls position="0 20 0" data-aframe-default-camera cameralistener>
+    <a-entity id="camera" camera="active: true" look-controls wasd-controls position="0 1.6 0" data-aframe-default-camera cameralistener>
 
     </a-entity>
 

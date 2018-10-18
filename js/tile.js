@@ -1,14 +1,11 @@
 class Tile {
 
-  constructor (x, y, zoom, latitude, longitude) {
+  constructor (x, y, zoom, latLon) {
     this.x = x;
     this.y = y;
-    this.zoom = 17;
-    this.latitude = latitude;
-    this.longitude = longitude;
-    this.tileLong = Util.long2tile(this.longitude,this.zoom);
-    this.tileLat = Util.lat2tile(this.latitude,this.zoom);
-    this.size = Util.getTileSizeInMeters(latitude, zoom);
+    this.zoom = ZOOMLEVEL;
+    this.latLon = latLon;
+    this.size = Util.getTileSizeInMeters(latLon.lat, zoom);
     this.plane = this.create()
 
   }
@@ -20,7 +17,7 @@ class Tile {
 
     THREE.ImageUtils.crossOrigin = '';
 
-    texture.setAttribute('id', this.tileLong + "a" + this.tileLat);
+    texture.setAttribute('id', this.latLon.coords2Tile()[0] + "a" + this.latLon.coords2Tile()[1]);
     texture.setAttribute('src', 'https://data.sebastiansettgast.com/42972.png');
     // texture.setAttribute('src', "https://c.tile.openstreetmap.org/" + this.zoom + "/" + this.tileLong + "/" + this.tileLat + ".png");
     // texture.setAttribute('src', "https://api.tiles.mapbox.com/v4/setti.411b5377/" + this.zoom + "/" + this.tileLong + "/" + this.tileLat + ".png?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A");
@@ -40,7 +37,7 @@ class Tile {
     // entityEl.setAttribute('src', "https://c.tile.openstreetmap.org/17/70268/42972.png");
     // entityEl.setAttribute('material', '#' + this.tileLong + "/" + this.tileLat);
 // https://api.tiles.mapbox.com/v4/setti.411b5377/3/1/1.png?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A
-    entityEl.setAttribute('material', { src: '#' + this.tileLong + 'a' + this.tileLat  });
+    entityEl.setAttribute('material', { src: '#' + this.latLon.coords2Tile()[0] + 'a' + this.latLon.coords2Tile()[1]  });
     // entityEl.setAttribute('src', "https://c.tile.openstreetmap.org/" + this.zoom + "/" + this.tileLong + "/" + this.tileLat + ".png");
 
 
@@ -53,5 +50,26 @@ class Tile {
 
   }
 
+  tileBounds () {
+    // "Returns bounds of the given tile in EPSG:900913 coordinates"
+
+    return []
+
+  }
+
   destroy () {}
 }
+/*
+
+
+def TileBounds(self, tx, ty, zoom):
+        "Returns bounds of the given tile in EPSG:900913 coordinates"
+
+        minx, miny = self.PixelsToMeters( tx*self.tileSize, ty*self.tileSize, zoom )
+        maxx, maxy = self.PixelsToMeters( (tx+1)*self.tileSize, (ty+1)*self.tileSize, zoom )
+        return ( minx, miny, maxx, maxy )
+
+
+
+
+ */
