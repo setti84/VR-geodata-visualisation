@@ -11,6 +11,7 @@
     <script src="./js/constants.js"></script>
     <script src="./js/util.js"></script>
 
+    <script src="./js/camera.js"></script>
     <script src="./js/latLng.js"></script>
     <script src="./js/tile.js"></script>
 
@@ -55,10 +56,7 @@
     <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" ></a-sphere>
      <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" ></a-cylinder>
 
-    <!-- <a-plane position="-92.5 0 -92.5" rotation="-90 0 0" src="./data/42972.png"  width="185" height="185" ></a-plane> -->
-
-
-    <a-entity id="camera" camera="active: true" look-controls wasd-controls position="0 1.6 0" data-aframe-default-camera cameralistener>
+    <a-entity id="camera" camera="active: true" look-controls wasd-controls rotation="-180 180 0" position="0 20 0" data-aframe-default-camera cameralistener>
 
     </a-entity>
 
