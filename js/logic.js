@@ -9,8 +9,6 @@ sendPos.addEventListener("click", function(event){
   //let pos = latLonPos.value.split(" ");
   changeCoordinatesDisplay(latLonPos.value.split(" "))
 
-
-
   const camera = document.querySelector('a-entity[cameralistener]');
 
 });

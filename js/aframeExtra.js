@@ -15,19 +15,18 @@ AFRAME.registerComponent('cameralistener', {
 
     // get a tile for the given coordinates
     this.tile = new Tile(cam.getOffset(), this.originLatLng);
-    // tile im rücken
+
+    // tile im rücken (position relativ vom Startpunkt)
     var newi = new Tile(cam.getOffset(), new LatLng(52.54599, 13.35582));
 
-    // tile geradeaus
+    // tile geradeaus (position relativ vom Startpunkt)
     var newi2 = new Tile(cam.getOffset(), new LatLng(52.5452, 13.35582));
 
-    // tile im rücken
-    var newi = new Tile(cam.getOffset(), new LatLng(52.545584, 13.3565));
+    // tile rechts (position relativ vom Startpunkt)
+    var newi3 = new Tile(cam.getOffset(), new LatLng(52.545584, 13.3565));
 
-    // tile geradeaus
-    var newi2 = new Tile(cam.getOffset(), new LatLng(52.545584, 13.355));
-
-
+    // tile links (position relativ vom Startpunkt)
+    var newi4 = new Tile(cam.getOffset(), new LatLng(52.545584, 13.355));
 
     console.log(this.tile)
 
@@ -49,15 +48,31 @@ AFRAME.registerComponent('cameralistener', {
 
       this.newPos = this.el.object3D.getWorldPosition();
 
-      posDelta.set(this.newPos.x-this.oldPos.x, 0, this.newPos.z-this.oldPos.z);
-      totalPosDelta.set(this.newPos.x-this.originWorldPosition.z, 0, this.newPos.z-this.originWorldPosition.z);
+      posDelta.set(this.newPos.x-this.oldPos.x, 0, (this.newPos.z-this.oldPos.z)*-1);
+      totalPosDelta.set(this.newPos.x-this.originWorldPosition.z, 0, (this.newPos.z-this.originWorldPosition.z)*-1);
 
       this.cam.setPosition(posDelta);
       this.cam.setTotalPosDelta(totalPosDelta);
+      // this.cam.setPositionDetectionArea();
+      //
+      // if(this.cam.getDetectionArea()[0] < this.tile.bounds[0]){
+      //   console.debug("new Tile")
+      // }
+      // if(this.cam.getDetectionArea()[1] > this.tile.bounds[1]){
+      //    console.debug("new Tile")
+      // }
+      // if(this.cam.getDetectionArea()[2] < this.tile.bounds[2]){
+      //   console.debug("new Tile")
+      // }
+      // if(this.cam.getDetectionArea()[3] > this.tile.bounds[3]){
+      //   console.debug("new Tile")
+      // }
 
       changeCoordinatesDisplay(this.cam);
 
       this.oldPos = this.el.object3D.getWorldPosition();
+
+      // this.cam.getDetectionArea()
 
 
 

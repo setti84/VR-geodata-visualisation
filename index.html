@@ -16,10 +16,10 @@
     <script src="./js/tile.js"></script>
 
 
-    <!-- <script src="./js/aframe-v0.8.2.js" ></script> -->
+     <script src="./js/aframe-v0.8.2.js" ></script>
 
 
-    <script src="./js/aframe-master.js" ></script>
+    <!--<script src="./js/aframe-master.js" ></script> -->
 
 
 
@@ -50,6 +50,10 @@
 
 <a-scene background="color: #ECECEC">
 
+    <a-assets>
+        <img id="sky" src="./data/background.png">
+    </a-assets>
+
     <!-- try different light options ... its fun!
     <a-entity light="type: ambient; color: #CCC"></a-entity>
     <a-entity light="type: directional; color: #EEE; intensity: 0.5" position="-1 1 0"></a-entity>
@@ -62,13 +66,14 @@
     -->
     <a-entity light="type: ambient;" ></a-entity>
 
-    <a-assets>
-    </a-assets>
+    <a-sky src="#sky"></a-sky>
+
+
     <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" ></a-box>
     <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" ></a-sphere>
     <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" ></a-cylinder>
 
-    <a-entity id="camera" camera="active: true" look-controls wasd-controls rotation="-180 180 0" position="0 20 0" data-aframe-default-camera cameralistener>
+    <a-entity id="camera" camera="active: true" look-controls wasd-controls rotation="-180 180 0" position="0 1.6 0" data-aframe-default-camera cameralistener>
 
     </a-entity>
 

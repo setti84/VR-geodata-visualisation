@@ -1,8 +1,11 @@
 
 const TILE_SIZE = 256;
+const SCALEFACTOR = 1.0;
+
+const detectionLength = 25.0; //in meter
 const ZOOMLEVEL = 19;
-const SCALEFACTOR = 1;
-const MOVINGFACTOR = 2;
+const MOVINGFACTOR = 300; // normal is 65
+const CAMERAHEIGHT = 20;
 
 const EARTH_RADIUS_IN_METERS = 6378137;
 const EARTH_CIRCUMFERENCE_IN_METERS = EARTH_RADIUS_IN_METERS * Math.PI * 2;
