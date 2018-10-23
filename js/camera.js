@@ -16,11 +16,14 @@ class Camera {
 
   setTotalPosDelta (vector) {
     this.totalPosDelta = vector;
-    console.log(vector)
   }
 
   getTotalPosDelta () {
-    return this.totalPosDelta
+    return this.totalPosDelta;
+  }
+
+  getOffset() {
+    return this.originMercator
   }
 
 }

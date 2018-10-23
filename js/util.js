@@ -22,23 +22,12 @@ var Util = {
     return [lat, lng]
   },
 
-  // tileBounds(tile, zoom){
-  //   // tile = [tx, ty] tilecoordinates in google Proj
-  //   // "Returns bounds of the given tile in EPSG:900913 coordinates"
-  //   const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(2**zoom);
-  //
-  //   const minX = tile[0]*TILE_SIZE*res-ORIGINSHIFT;
-  //   const minY = tile[1]*TILE_SIZE*res-ORIGINSHIFT;
-  //   const maxX = (tile[0]+1)*TILE_SIZE*res-ORIGINSHIFT;
-  //   const maxY = (tile[1]+1)*TILE_SIZE*res-ORIGINSHIFT;
-  //
-  //   return{minX: minX,maxX: maxX, minY: minY, maxY: maxY}
-  // },
-
-
-
-
-
+  coords2Tile (lng, lat ,zoom) {
+    // OSM Buildings
+    // lng,lat aka x,y
+    return [ (Math.floor((lng+180)/360*Math.pow(2,zoom))),
+      (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom)))]
+  }
 
 }
 

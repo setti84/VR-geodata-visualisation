@@ -7,13 +7,29 @@ AFRAME.registerComponent('cameralistener', {
     this.originLatLng = new LatLng(52.545584 , 13.355818);
 
     const cam = this.cam = new Camera(this.originLatLng);
+    console.log(cam.getOffset())
     this.oldPos = this.newPos = this.originWorldPosition = this.el.object3D.getWorldPosition();
 
     let posDelta = new THREE.Vector3();
     let totalPosDelta = new THREE.Vector3();
 
     // get a tile for the given coordinates
-    this.tile = new Tile(this.oldPos.x, this.oldPos.z, this.originLatLng);
+    this.tile = new Tile(cam.getOffset(), this.originLatLng);
+    // tile im rücken
+    var newi = new Tile(cam.getOffset(), new LatLng(52.54599, 13.35582));
+
+    // tile geradeaus
+    var newi2 = new Tile(cam.getOffset(), new LatLng(52.5452, 13.35582));
+
+    // tile im rücken
+    var newi = new Tile(cam.getOffset(), new LatLng(52.545584, 13.3565));
+
+    // tile geradeaus
+    var newi2 = new Tile(cam.getOffset(), new LatLng(52.545584, 13.355));
+
+
+
+    console.log(this.tile)
 
 
 
@@ -40,7 +56,6 @@ AFRAME.registerComponent('cameralistener', {
       this.cam.setTotalPosDelta(totalPosDelta);
 
       changeCoordinatesDisplay(this.cam);
-      console.log(this.cam.getTotalPosDelta())
 
       this.oldPos = this.el.object3D.getWorldPosition();
 

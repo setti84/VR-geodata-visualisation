@@ -31,7 +31,7 @@ class LatLng {
 
   merc2Tile () {
     // "Returns tile for given mercator coordinates"
-    const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(2**this.zoom);
+    const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,this.zoom));
     const px = (this.mercatorCoord[0]+ORIGINSHIFT)/res;
     const py = (this.mercatorCoord[1]+ORIGINSHIFT)/res;
 
@@ -39,7 +39,7 @@ class LatLng {
   }
 
   googleTiles () {
-    return [this.merc2Tile()[0], (2**this.zoom - 1) - this.merc2Tile()[1]]
+    return [this.merc2Tile()[0], (Math.pow(2,this.zoom) - 1) - this.merc2Tile()[1]]
   }
 
 

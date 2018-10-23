@@ -50,11 +50,23 @@
 
 <a-scene background="color: #ECECEC">
 
+    <!-- try different light options ... its fun!
+    <a-entity light="type: ambient; color: #CCC"></a-entity>
+    <a-entity light="type: directional; color: #EEE; intensity: 0.5" position="-1 1 0"></a-entity>
+    <a-entity light="type: hemisphere; color: #33C; groundColor: #3C3; intensity: 2"></a-entity>
+    <a-entity light="type: point; intensity: 0.75; distance: 50; decay: 2" position="0 10 10"></a-entity>
+    <a-entity light="type: spot; angle: 45"></a-entity>
+
+    https://github.com/aframevr/aframe/blob/master/docs/components/light.md
+
+    -->
+    <a-entity light="type: ambient;" ></a-entity>
+
     <a-assets>
     </a-assets>
     <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" ></a-box>
     <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" ></a-sphere>
-     <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" ></a-cylinder>
+    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" ></a-cylinder>
 
     <a-entity id="camera" camera="active: true" look-controls wasd-controls rotation="-180 180 0" position="0 20 0" data-aframe-default-camera cameralistener>
 

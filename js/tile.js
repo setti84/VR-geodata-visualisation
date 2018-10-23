@@ -1,24 +1,29 @@
 class Tile {
 
-  constructor (x, y, latLon) {
+  constructor (offset, latLon) {
 
+    this.offset = [offset[0],offset[1]];
     this.latLon = latLon;
-    this.tileCoords = [latLon.googleTiles()[0], latLon.googleTiles()[1]];
-    this.size2 = Util.getTileSizeInMeters(latLon.lat, this.latLon.zoom);
-
+    // this.tileCoords = [latLon.googleTiles()[0], latLon.googleTiles()[1]];
+    this.tileCoords = [latLon.merc2Tile()[0], latLon.merc2Tile()[1]];
+    // this.size2 = Util.getTileSizeInMeters(latLon.lat, this.latLon.zoom);
 
     const bounds = this.bounds = this.tileBounds(this.tileCoords,this.latLon.zoom);
-    this.plane = this.create(bounds);
+    const middle = this.tileMiddle = this.tileMiddle(bounds);
+    this.plane = this.create(bounds, middle);
 
-    console.log("TileSize2: " + this.size2);
+
     console.log("Tile Bounds: " + this.bounds.toString())
 
   }
 
-  create (bounds) {
+  create (bounds, middle) {
 
     const texture = document.createElement('img');
     // <img id="advertisement" src="ad.png">  crossorigin="anonymous"
+
+    console.log("Offset: " + this.offset)
+    console.log("middle of Tile: " + middle)
 
 
     texture.setAttribute('id', this.latLon.googleTiles()[0] + "a" + this.latLon.googleTiles()[1]);
@@ -32,6 +37,7 @@ class Tile {
     document.querySelector('a-assets').appendChild(texture);
 
     const size = Math.floor(bounds[3] - bounds[2]);
+    console.log(size)
     let entityEl = document.createElement('a-entity');
 
 
@@ -48,7 +54,11 @@ class Tile {
     entityEl.setAttribute('material', { src: '#' + this.latLon.googleTiles()[0] + "a" + this.latLon.googleTiles()[1]});
     // entityEl.setAttribute('src', "https://c.tile.openstreetmap.org/" + this.zoom + "/" + this.tileLong + "/" + this.tileLat + ".png");
 
-    entityEl.setAttribute('position', {x:-1*(size/2), y:0, z:-1*(size/2)});
+    var pos = [this.offset[0]-middle[0], this.offset[1]-middle[1]];
+    console.log(pos)
+
+    // entityEl.setAttribute('position', {x:-1*(size/2), y:0, z:-1*(size/2)});
+    entityEl.setAttribute('position', {x:-1*pos[0], y:0, z:pos[1]});
     entityEl.setAttribute('rotation', {x:-90, y:0, z:0});
 
 
@@ -58,10 +68,16 @@ class Tile {
 
   }
 
+  tileMiddle (bounds) {
+    // return middle point of tile in mercator point x,y coordinates
+    const offset = (bounds[1] - bounds[0])/2;
+    return [bounds[0]+offset,bounds[2]+offset]
+  }
+
   tileBounds(){
     // tile = [tx, ty] = tilecoordinates
     // "Returns bounds of the given tile in EPSG:900913 coordinates"
-    const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(2**this.latLon.zoom);
+    const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,this.latLon.zoom));
 
     const minX = this.tileCoords[0]*TILE_SIZE*res-ORIGINSHIFT;
     const minY = this.tileCoords[1]*TILE_SIZE*res-ORIGINSHIFT;
