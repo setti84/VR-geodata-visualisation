@@ -1,28 +1,27 @@
 class Tile {
 
-  constructor (offset, latLon) {
+  constructor (origin, coords) {
 
-    this.offset = [offset[0],offset[1]];
-    this.latLon = latLon;
-    // this.tileCoords = [latLon.googleTiles()[0], latLon.googleTiles()[1]];
-    this.tileCoords = [latLon.merc2Tile()[0], latLon.merc2Tile()[1]];
-    // this.size2 = Util.getTileSizeInMeters(latLon.lat, this.latLon.zoom);
+    this.origin = origin;
+    this.tileCoords = coords;
+    this.isLoaded = false;
 
-    const bounds = this.bounds = this.tileBounds(this.tileCoords,this.latLon.zoom);
-    const middle = this.tileMiddle = this.tileMiddle(bounds);
-    console.log(middle)
-    this.create(bounds, middle);
+    const bounds = this.bounds = this.tileBounds(this.tileCoords,this.origin.zoom);
+    this.tileMiddle = this.gettileMiddle(bounds);
+    this.distanceToOrigin = 100;
+    this.calculateDistanceToOrrigin(origin);
 
   }
 
-  create (bounds, middle) {
+  create () {
 
-    const x = this.latLon.googleTiles()[0];
-    const y = this.latLon.googleTiles()[1];
+    this.isLoaded = true;
+    const x = this.tileCoords[0];
+    const y = this.tileCoords[1];
     const texture = document.createElement('img');
-    // const size = Math.floor(bounds[3] - bounds[2]); // recognise tile gaps
-    const size = bounds[3] - bounds[2];
-    const pos = [this.offset[0]-middle[0], this.offset[1]-middle[1]];
+    // const size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
+    const size = this.bounds[1] - this.bounds[0];
+    const pos = [this.origin.wgs2Mercator()[0]-this.tileMiddle[0], this.origin.wgs2Mercator()[1]-this.tileMiddle[1]];
     const tilePlane = document.createElement('a-entity');
 
     texture.addEventListener('load', (event) => {
@@ -46,55 +45,44 @@ class Tile {
     texture.setAttribute('id', x + "a" + y);
     texture.setAttribute('crossorigin', "anonymous" );
     texture.setAttribute('src', "https://api.tiles.mapbox.com/v4/setti.411b5377/" +
-      this.latLon.zoom + "/" +
-      this.latLon.googleTiles()[0] + "/" +
-      this.latLon.googleTiles()[1] +
+      this.origin.zoom + "/" +
+      this.tileCoords[0] + "/" +
+      this.tileCoords[1] +
       ".png?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A");
+
+    // texture.setAttribute('src', "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/" +
+    //   this.origin.zoom + "/" +
+    //   this.tilecoords[1] + "/" +
+    //   this.tilecoords[0]);
 
   }
 
-  tileMiddle (bounds) {
+  gettileMiddle (bounds) {
     // return middle point of tile in mercator point x,y coordinates
+    // offset is half of a tile
     const offset = (bounds[1] - bounds[0])/2;
-    return [bounds[0]+offset,bounds[2]+offset]
+    return [bounds[0]+offset,bounds[2]-offset]
   }
 
   tileBounds(){
     // tile = [tx, ty] = tilecoordinates
     // "Returns bounds of the given tile in EPSG:900913 coordinates"
-    const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,this.latLon.zoom));
+    const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,this.origin.zoom));
 
     const minX = this.tileCoords[0]*TILE_SIZE*res-ORIGINSHIFT;
-    const minY = this.tileCoords[1]*TILE_SIZE*res-ORIGINSHIFT;
     const maxX = (this.tileCoords[0]+1)*TILE_SIZE*res-ORIGINSHIFT;
-    const maxY = (this.tileCoords[1]+1)*TILE_SIZE*res-ORIGINSHIFT;
+    const minY = Math.abs(this.tileCoords[1]*TILE_SIZE*res-ORIGINSHIFT);
+    const maxY = Math.abs((this.tileCoords[1]+1)*TILE_SIZE*res-ORIGINSHIFT);
 
-    return [minX, maxX,  minY,  maxY];
+    return [minX, maxX, minY, maxY];
+
+  }
+  calculateDistanceToOrrigin(newCameraPos){
+    // Pythagorean theorem for doing the maths
+    // this.distanceToOrigin =  Math.abs(this.origin.wgs2Mercator()[0] - this.tileMiddle[0])+ Math.abs(this.origin.wgs2Mercator()[1] - Math.abs(this.tileMiddle[1]));
+    this.distanceToOrigin =  Math.floor(Math.abs(newCameraPos.wgs2Mercator()[0] - this.tileMiddle[0]) + Math.abs(newCameraPos.wgs2Mercator()[1] - Math.abs(this.tileMiddle[1])));
 
   }
 
   destroy () {}
 }
-
-/*
-
-// entityEl.setAttribute('position', {x:-1*(size/2), y:0, z:-1*(size/2)});
-
-
- // entityEl.setAttribute('src', "https://c.tile.openstreetmap.org/" + this.zoom + "/" + this.tileLong + "/" + this.tileLat + ".png");
-
-
-
-
-    // texture.setAttribute('src', 'https://data.sebastiansettgast.com/42972.png' );
-    // texture.setAttribute('src', "https://c.tile.openstreetmap.org/" + this.latLon.zoom + "/" + this.latLon.googleTiles()[0] + "/" + this.latLon.googleTiles()[1] + ".png");
-
-
-
-    // entityEl.setAttribute('src', "https://c.tile.openstreetmap.org/17/70268/42972.png");
-    // entityEl.setAttribute('material', '#' + this.tileLong + "/" + this.tileLat);
-// https://api.tiles.mapbox.com/v4/setti.411b5377/3/1/1.png?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A
-//     entityEl.setAttribute('material', { src: '#' + this.latLon.coords2Tile()[0] + 'a' + this.latLon.coords2Tile()[1]  });
-
-
- */
