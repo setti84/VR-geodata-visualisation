@@ -42,34 +42,4 @@ class LatLng {
     return [this.merc2Tile()[0], (Math.pow(2,this.zoom) - 1) - this.merc2Tile()[1]]
   }
 
-
-  // projectWorldCoordinates2 () {
-  //   // OSM version
-  //   //"Converts given lat/lon in WGS84 Datum to XY in Spherical Mercator EPSG:900913"
-  //   const x = this.lng * ORIGINSHIFT / 180;
-  //   let y = Math.log( Math.tan((90 + this.lat) * Math.PI / 360 )) / (Math.PI / 180);
-  //   y = y * ORIGINSHIFT / 180;
-  //
-  //   return [x, y];
-  // }
-
-  // coords2Tile () {
-  //   // OSM Buildings
-  //   // lng,lat aka x,y
-  //   return [ (Math.floor((this.lng+180)/360*Math.pow(2,this.zoom))),
-  //     (Math.floor((1-Math.log(Math.tan(this.lat*Math.PI/180) + 1/Math.cos(this.lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,this.zoom)))]
-  // }
-
-  // tileCoordinate () {
-  //   // Google
-  //   // x,y
-  //   const scale = Math.pow(2,this.zoom);
-  //   return [Math.floor(this.projectWorldCoordinates()[0] * scale / TILE_SIZE), Math.floor(this.projectWorldCoordinates()[1] * scale / TILE_SIZE)]
-  // }
-
-  // pixelCoordinates () {
-  //   const scale = Math.pow(2,this.zoom);
-  //   return [Math.floor(this.projectWorldCoordinates()[0] * scale), Math.floor(this.projectWorldCoordinates()[1] * scale)]
-  // }
-
 }

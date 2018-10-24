@@ -10,8 +10,6 @@ class Camera {
     const camDom =document.querySelector('#camera');
     camDom.setAttribute('wasd-controls', { acceleration: MOVINGFACTOR });
     camDom.object3D.position.set(camDom.object3D.position.x, CAMERAHEIGHT, camDom.object3D.position.z);
-    // this.createDetectionPlane();
-
 
   }
 
@@ -39,36 +37,5 @@ class Camera {
   getOffset() {
     return this.originMercator
   }
-
-  // getDetectionArea() {
-  //   let xy = this.newLatLng.wgs2Mercator();
-  //   let minX = xy[0]-DETECTIONLENGTH;
-  //   let minY = xy[1]-DETECTIONLENGTH;
-  //   let maxX = xy[0]+DETECTIONLENGTH;
-  //   let maxY = xy[1]+DETECTIONLENGTH;
-  //
-  //   return [minX, maxX,  minY,  maxY];
-  // }
-
-  // createDetectionPlane() {
-  //
-  //   const detectionPlane = document.createElement('a-entity');
-  //   detectionPlane.setAttribute('id','detectionPlane');
-  //   detectionPlane.setAttribute('geometry', {
-  //     primitive: 'plane',
-  //     height:DETECTIONLENGTH*2,
-  //     width: DETECTIONLENGTH*2
-  //   });
-  //   detectionPlane.setAttribute('position', {x:0, y:1, z:0});
-  //
-  //   detectionPlane.setAttribute('rotation', {x:-90, y:0, z:0});
-  //   document.querySelector('a-scene').appendChild(detectionPlane);
-  // }
-  //
-  // setPositionDetectionArea () {
-  //   const detectionPlane = document.querySelector('#detectionPlane');
-  //   detectionPlane.object3D.position.set(this.totalPosDelta.x, 1, this.totalPosDelta.z*-1);
-  //
-  // }
 
 }
