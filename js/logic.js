@@ -27,4 +27,5 @@ function changeCoordinatesDisplay(cam) {
     + "New Pos in Tile: " + cam.newLatLng.googleTiles()  + "\n ";
 
   ;
+
 }

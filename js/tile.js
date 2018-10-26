@@ -5,10 +5,12 @@ class Tile {
     this.origin = origin;
     this.tileCoords = coords;
     this.isLoaded = false;
+    this.distanceToOrigin = 100; // random value set
+    this.scene = document.querySelector('a-scene');
+    this.tilePlane;
 
     const bounds = this.bounds = this.tileBounds(this.tileCoords,this.origin.zoom);
     this.tileMiddle = this.gettileMiddle(bounds);
-    this.distanceToOrigin = 100;
     this.calculateDistanceToOrrigin(origin);
 
   }
@@ -18,27 +20,29 @@ class Tile {
     this.isLoaded = true;
     const x = this.tileCoords[0];
     const y = this.tileCoords[1];
+    console.log("load: " + x + y)
     const texture = document.createElement('img');
-    // const size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
-    const size = this.bounds[1] - this.bounds[0];
+    const size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
+    // const size = this.bounds[1] - this.bounds[0];
     const pos = [this.origin.wgs2Mercator()[0]-this.tileMiddle[0], this.origin.wgs2Mercator()[1]-this.tileMiddle[1]];
-    const tilePlane = document.createElement('a-entity');
+    this.tilePlane = document.createElement('a-entity');
 
-    texture.addEventListener('load', (event) => {
+    texture.addEventListener('load', e => {
 
       document.querySelector('a-assets').appendChild(texture);
 
-      tilePlane.setAttribute('geometry', {
+      this.tilePlane.setAttribute('geometry', {
         primitive: 'plane',
         height:size,
         width: size
       });
 
-      tilePlane.setAttribute('material', { src: '#' + x + "a" + y});
-      tilePlane.setAttribute('position', {x:-1*pos[0], y:0, z:pos[1]});
-      tilePlane.setAttribute('rotation', {x:-90, y:0, z:0});
+      this.tilePlane.setAttribute('material', { src: '#' + x + "a" + y});
+      this.tilePlane.setAttribute('position', {x:-1*pos[0], y:0, z:pos[1]});
+      this.tilePlane.setAttribute('rotation', {x:-90, y:0, z:0});
 
-      document.querySelector('a-scene').appendChild(tilePlane);
+      // document.querySelector('a-scene').appendChild(tilePlane);
+      this.scene.appendChild(this.tilePlane);
 
     });
 
@@ -61,6 +65,7 @@ class Tile {
     // return middle point of tile in mercator point x,y coordinates
     // offset is half of a tile
     const offset = (bounds[1] - bounds[0])/2;
+    console.log(bounds)
     return [bounds[0]+offset,bounds[2]-offset]
   }
 
@@ -73,16 +78,32 @@ class Tile {
     const maxX = (this.tileCoords[0]+1)*TILE_SIZE*res-ORIGINSHIFT;
     const minY = Math.abs(this.tileCoords[1]*TILE_SIZE*res-ORIGINSHIFT);
     const maxY = Math.abs((this.tileCoords[1]+1)*TILE_SIZE*res-ORIGINSHIFT);
+    // const minY = this.tileCoords[1]*TILE_SIZE*res-ORIGINSHIFT;
+    // const maxY = (this.tileCoords[1]+1)*TILE_SIZE*res-ORIGINSHIFT;
 
     return [minX, maxX, minY, maxY];
 
   }
   calculateDistanceToOrrigin(newCameraPos){
-    // Pythagorean theorem for doing the maths
-    // this.distanceToOrigin =  Math.abs(this.origin.wgs2Mercator()[0] - this.tileMiddle[0])+ Math.abs(this.origin.wgs2Mercator()[1] - Math.abs(this.tileMiddle[1]));
+    // Pythagorean theorem to get the distance
+    // this.distanceToOrigin =  Math.floor(Math.abs(newCameraPos.wgs2Mercator()[0] - this.tileMiddle[0]) + Math.abs(newCameraPos.wgs2Mercator()[1] - Math.abs(this.tileMiddle[1])));
+  console.log(newCameraPos.wgs2Mercator())
+    console.log(this.tileMiddle)
+
     this.distanceToOrigin =  Math.floor(Math.abs(newCameraPos.wgs2Mercator()[0] - this.tileMiddle[0]) + Math.abs(newCameraPos.wgs2Mercator()[1] - Math.abs(this.tileMiddle[1])));
 
   }
 
-  destroy () {}
+  destroy () {
+    console.log("destroy tile???????")
+    // console.log(this.tilePlane)
+    // if(this.tilePlane){
+    //   this.scene.removeChild(this.tilePlane);
+    // }
+
+    /*
+    get rid of texture
+    get rid of geometry
+     */
+  }
 }

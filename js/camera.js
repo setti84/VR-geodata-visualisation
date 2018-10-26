@@ -20,6 +20,7 @@ class Camera {
   setPosition (positionDelta){
     const temp = Util.unprojectWorldCoordinates(this.newLatLng.wgs2Mercator()[0]+positionDelta.x, this.newLatLng.wgs2Mercator()[1]+positionDelta.z);
     this.newLatLng.setCoords(temp[0], temp[1]);
+    // console.log(this.newLatLng)
   }
 
   getPosition(){
