@@ -1,5 +1,7 @@
 
 
+var testiobj = 0;
+
 const latLonPos = document.getElementById('latLonPos');
 const sendPos = document.getElementById('sendPos');
 console.log(window)

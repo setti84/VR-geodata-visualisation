@@ -6,6 +6,7 @@ class Tile {
     this.origin = origin;
     this.tileCoords = coords;
     this.isLoaded = false;
+    this.isLoading = false;
     this.distanceToOrigin = 100; // random value set
     this.scene = document.querySelector('a-scene');
 
@@ -18,29 +19,30 @@ class Tile {
 
   create () {
 
-    // this.isLoaded = true;
+    this.isLoading = true;
     const x = this.tileCoords[0];
     const y = (Math.pow(2,this.origin.zoom) -1) - this.tileCoords[1];
-    let size = this.bounds[1] - this.bounds[0]; // recognise tile gaps
+    let size = this.bounds[1] - this.bounds[0];
     const pos = [this.origin.wgs2Mercator()[0]-this.tileMiddle[0], this.origin.wgs2Mercator()[1]-this.tileMiddle[1]];
-    // if(DEBUGGING){
-    //   this.showTileNumber(pos,x,y);
-    //   size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
-    // }
-    const texture = document.createElement('img');
-    texture.addEventListener('load', e => {
-      document.querySelector('a-assets').appendChild(texture);
-      this.tilePlane.setAttribute('material', { src: '#' + x + "a" + y});
-      this.scene.appendChild(this.tilePlane);
-      // console.log("texture : " + e.target.id)
-    });
+    if(DEBUGGING){
+      this.showTileNumber(pos,x,y);
+      size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
+    }
 
     this.tilePlane = document.createElement('a-entity');
+    this.tilePlane.setAttribute('geometry', {
+      primitive: 'plane',
+      height:size,
+      width: size
+    });
+    this.tilePlane.object3D.position.set(-1*pos[0],0,pos[1]);
+    this.tilePlane.setAttribute('rotation', {x:-90, y:0, z:0});
+    this.tilePlane.setAttribute('id', x + "a" + y);
     this.tilePlane.addEventListener('loaded', (evt) => {
       this.isLoaded = true;
-      // console.log("plane   : " +evt.target.id)
     });
 
+    const texture = document.createElement('img');
     texture.setAttribute('id', x + "a" + y);
     texture.setAttribute('crossorigin', "anonymous" );
     texture.setAttribute('src', "https://api.tiles.mapbox.com/v4/setti.411b5377/" +
@@ -54,15 +56,23 @@ class Tile {
     //   this.tilecoords[1] + "/" +
     //   this.tilecoords[0]);
 
-    this.tilePlane.setAttribute('geometry', {
-      primitive: 'plane',
-      height:size,
-      width: size
+    texture.addEventListener('load', e => {
+      // testiobj++;
+      // console.log(testiobj)
+      document.querySelector('a-assets').appendChild(texture);
+      this.tilePlane.setAttribute('material', { src: '#' + x + "a" + y});
+      this.scene.appendChild(this.tilePlane);
+      // console.log("texture : " + e.target.id)
+      // console.log(this.tileCoords)
+      // console.log(this)
     });
 
-    this.tilePlane.object3D.position.set(-1*pos[0],0,pos[1]);
-    this.tilePlane.setAttribute('rotation', {x:-90, y:0, z:0});
-    this.tilePlane.setAttribute('id', x + "a" + y);
+
+
+
+
+
+
 
   }
 
@@ -98,7 +108,7 @@ class Tile {
     // visualisation of the tilenumber on top of the tile -> debugging
 
     this.tileText = document.createElement('a-text');
-    const scale = 20;
+    const scale = 15;
     const text = "G: " + x + "/" + y +
                  "\n TMS: " + this.tileCoords[0] + "/" + this.tileCoords[1] +
                  "\n Zoom: " + this.origin.zoom;
@@ -117,25 +127,43 @@ class Tile {
   }
 
   destroy () {
-    // console.log("destroy tile???????")
-    // console.log(this)
 
     // this.tilePlane.setAttribute('material', {color: 'black'});
-
     // this.tilePlane = 0;
 
 
+
+// console.log(this.isLoaded)
     if(this.isLoaded){
+      // console.log("destroy")
+      // console.log(this.isLoaded)
       // console.log(this.tilePlane)
       this.tilePlane.parentNode.removeChild(this.tilePlane);
+      if(DEBUGGING){
+        this.tileText.parentNode.removeChild(this.tileText);
+      }
     } else {
-      console.log("isLoaded: " + this.isLoaded)
+      console.log("not loaded yet, status: " + this.isLoaded)
+
+      const waiting = setInterval( () => {
+        console.log("in interval")
+        if(this.isLoaded){
+          this.tilePlane.parentNode.removeChild(this.tilePlane);
+          if(DEBUGGING){
+            this.tileText.parentNode.removeChild(this.tileText);
+          }
+          clearTimeout(waiting);
+
+          console.log("clear interval, tile removed ")
+        }
+      } , 200);
+
+
+
     }
 
 
-    // if(DEBUGGING){
-    //   this.tileText.parentNode.removeChild(this.tileText);
-    // }
+
 
 
     // console.log(this.tilePlane)

@@ -31,12 +31,14 @@ class MovementWatcher {
       e.calculateDistanceToOrrigin(this.newCameraPos)
       // console.log(e.distanceToOrigin)
       // console.log("distance: " + e.distanceToOrigin)
-      // console.log("is loaded? " + e.isLoaded)
+      // console.log("is loaded? " + e.isLoading)
       // console.log("------------------------------------")
-      if(e.distanceToOrigin < LOADING_TILE_DISTANCE && !e.isLoaded){
+      if(e.distanceToOrigin < LOADING_TILE_DISTANCE && !e.isLoading){
         // console.log("create tile")
-        // console.log(e.isLoaded)
+        // console.log(e.isLoading)
         e.create();
+        // console.log(e.tileCoords)
+        // console.log(e)
       }
 
 
@@ -130,19 +132,22 @@ class MovementWatcher {
       };
       if(!neededTile){
         this.joiningTiles.splice(i,1);
-        if(oldElement.isLoaded){
-          // oldElement.destroy();
-        }
+        oldElement.destroy();
         i--;
       }
       neededTile=false;
     }
     // console.log(this.tileStack)
+    // add the new needed tiles to the old tile stack. tiles get loaded later. From this point there are only available for distance calculation
     this.tileStack.forEach( e => { this.joiningTiles.push(new Tile(this.origin,e)) });
 
+    this.joiningTiles.sort( (a,b) => {return a.tileCoords[0] - b.tileCoords[0]} )
+// distanceToOrigin
     this.joiningTilesBlocked = false;
 
+    // this.tileStack.forEach( e => console.log(e));
     console.log(this.joiningTiles.length)
+    // console.log(this.joiningTiles)
 
     // console.log("------")
 
