@@ -1,4 +1,5 @@
 class Tile {
+  // Tiles are square flat polygons with with a rendered map view as a texture
 
   constructor (origin, coords) {
 
@@ -7,51 +8,45 @@ class Tile {
     this.isLoaded = false;
     this.distanceToOrigin = 100; // random value set
     this.scene = document.querySelector('a-scene');
-    this.tilePlane;
 
     const bounds = this.bounds = this.tileBounds(this.tileCoords,this.origin.zoom);
     this.tileMiddle = this.gettileMiddle(bounds);
     this.calculateDistanceToOrrigin(origin);
+    // console.log(document.querySelector('a-assets').fileLoader);
 
   }
 
   create () {
 
-    this.isLoaded = true;
+    // this.isLoaded = true;
     const x = this.tileCoords[0];
-    const y = this.tileCoords[1];
-    console.log("load: " + x + y)
-    const texture = document.createElement('img');
-    const size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
-    // const size = this.bounds[1] - this.bounds[0];
+    const y = (Math.pow(2,this.origin.zoom) -1) - this.tileCoords[1];
+    let size = this.bounds[1] - this.bounds[0]; // recognise tile gaps
     const pos = [this.origin.wgs2Mercator()[0]-this.tileMiddle[0], this.origin.wgs2Mercator()[1]-this.tileMiddle[1]];
-    this.tilePlane = document.createElement('a-entity');
-
+    // if(DEBUGGING){
+    //   this.showTileNumber(pos,x,y);
+    //   size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
+    // }
+    const texture = document.createElement('img');
     texture.addEventListener('load', e => {
-
       document.querySelector('a-assets').appendChild(texture);
-
-      this.tilePlane.setAttribute('geometry', {
-        primitive: 'plane',
-        height:size,
-        width: size
-      });
-
       this.tilePlane.setAttribute('material', { src: '#' + x + "a" + y});
-      this.tilePlane.setAttribute('position', {x:-1*pos[0], y:0, z:pos[1]});
-      this.tilePlane.setAttribute('rotation', {x:-90, y:0, z:0});
-
-      // document.querySelector('a-scene').appendChild(tilePlane);
       this.scene.appendChild(this.tilePlane);
+      // console.log("texture : " + e.target.id)
+    });
 
+    this.tilePlane = document.createElement('a-entity');
+    this.tilePlane.addEventListener('loaded', (evt) => {
+      this.isLoaded = true;
+      // console.log("plane   : " +evt.target.id)
     });
 
     texture.setAttribute('id', x + "a" + y);
     texture.setAttribute('crossorigin', "anonymous" );
     texture.setAttribute('src', "https://api.tiles.mapbox.com/v4/setti.411b5377/" +
       this.origin.zoom + "/" +
-      this.tileCoords[0] + "/" +
-      this.tileCoords[1] +
+      x + "/" +
+      y +
       ".png?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A");
 
     // texture.setAttribute('src', "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/" +
@@ -59,14 +54,24 @@ class Tile {
     //   this.tilecoords[1] + "/" +
     //   this.tilecoords[0]);
 
+    this.tilePlane.setAttribute('geometry', {
+      primitive: 'plane',
+      height:size,
+      width: size
+    });
+
+    this.tilePlane.object3D.position.set(-1*pos[0],0,pos[1]);
+    this.tilePlane.setAttribute('rotation', {x:-90, y:0, z:0});
+    this.tilePlane.setAttribute('id', x + "a" + y);
+
   }
 
   gettileMiddle (bounds) {
     // return middle point of tile in mercator point x,y coordinates
     // offset is half of a tile
     const offset = (bounds[1] - bounds[0])/2;
-    console.log(bounds)
-    return [bounds[0]+offset,bounds[2]-offset]
+    return [bounds[0]+offset,bounds[2]+offset]
+
   }
 
   tileBounds(){
@@ -76,32 +81,70 @@ class Tile {
 
     const minX = this.tileCoords[0]*TILE_SIZE*res-ORIGINSHIFT;
     const maxX = (this.tileCoords[0]+1)*TILE_SIZE*res-ORIGINSHIFT;
-    const minY = Math.abs(this.tileCoords[1]*TILE_SIZE*res-ORIGINSHIFT);
-    const maxY = Math.abs((this.tileCoords[1]+1)*TILE_SIZE*res-ORIGINSHIFT);
-    // const minY = this.tileCoords[1]*TILE_SIZE*res-ORIGINSHIFT;
-    // const maxY = (this.tileCoords[1]+1)*TILE_SIZE*res-ORIGINSHIFT;
+    const minY = this.tileCoords[1]*TILE_SIZE*res-ORIGINSHIFT;
+    const maxY = (this.tileCoords[1]+1)*TILE_SIZE*res-ORIGINSHIFT;
 
     return [minX, maxX, minY, maxY];
 
   }
-  calculateDistanceToOrrigin(newCameraPos){
-    // Pythagorean theorem to get the distance
-    // this.distanceToOrigin =  Math.floor(Math.abs(newCameraPos.wgs2Mercator()[0] - this.tileMiddle[0]) + Math.abs(newCameraPos.wgs2Mercator()[1] - Math.abs(this.tileMiddle[1])));
-  console.log(newCameraPos.wgs2Mercator())
-    console.log(this.tileMiddle)
 
-    this.distanceToOrigin =  Math.floor(Math.abs(newCameraPos.wgs2Mercator()[0] - this.tileMiddle[0]) + Math.abs(newCameraPos.wgs2Mercator()[1] - Math.abs(this.tileMiddle[1])));
+  calculateDistanceToOrrigin(newCameraPos){
+    // Pythagorean theorem to get the distance to the camera
+    this.distanceToOrigin = Math.sqrt(Math.pow((newCameraPos.wgs2Mercator()[0]-this.tileMiddle[0]), 2) + Math.pow((newCameraPos.wgs2Mercator()[1]-this.tileMiddle[1]), 2));
+
+  }
+
+  showTileNumber(pos,x,y) {
+    // visualisation of the tilenumber on top of the tile -> debugging
+
+    this.tileText = document.createElement('a-text');
+    const scale = 20;
+    const text = "G: " + x + "/" + y +
+                 "\n TMS: " + this.tileCoords[0] + "/" + this.tileCoords[1] +
+                 "\n Zoom: " + this.origin.zoom;
+
+    this.tileText.setAttribute('position', {x:-1*pos[0], y:0.5, z:pos[1]});
+    this.tileText.setAttribute('align', 'center');
+    this.tileText.setAttribute('value', text);
+
+    this.tileText.setAttribute('scale', {x:scale,y:scale,z:scale});
+    this.tileText.setAttribute('color', 'black');
+    this.tileText.setAttribute('side', 'double');
+    this.tileText.setAttribute('rotation', {x:-90, y:0, z:0});
+
+    this.scene.appendChild(this.tileText);
 
   }
 
   destroy () {
-    console.log("destroy tile???????")
+    // console.log("destroy tile???????")
+    // console.log(this)
+
+    // this.tilePlane.setAttribute('material', {color: 'black'});
+
+    // this.tilePlane = 0;
+
+
+    if(this.isLoaded){
+      // console.log(this.tilePlane)
+      this.tilePlane.parentNode.removeChild(this.tilePlane);
+    } else {
+      console.log("isLoaded: " + this.isLoaded)
+    }
+
+
+    // if(DEBUGGING){
+    //   this.tileText.parentNode.removeChild(this.tileText);
+    // }
+
+
     // console.log(this.tilePlane)
     // if(this.tilePlane){
     //   this.scene.removeChild(this.tilePlane);
     // }
 
     /*
+    get rid of tiletext
     get rid of texture
     get rid of geometry
      */

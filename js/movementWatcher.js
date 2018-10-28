@@ -30,11 +30,11 @@ class MovementWatcher {
     this.joiningTiles.forEach( e => {
       e.calculateDistanceToOrrigin(this.newCameraPos)
       // console.log(e.distanceToOrigin)
-      console.log("distance: " + e.distanceToOrigin)
+      // console.log("distance: " + e.distanceToOrigin)
       // console.log("is loaded? " + e.isLoaded)
       // console.log("------------------------------------")
       if(e.distanceToOrigin < LOADING_TILE_DISTANCE && !e.isLoaded){
-        console.log("create tile")
+        // console.log("create tile")
         // console.log(e.isLoaded)
         e.create();
       }
@@ -77,17 +77,18 @@ class MovementWatcher {
   //  check in old tiles which tile we need to keep for moving camera to new tile
   //  add additional new tiles to stack
 
-    const curTile = this.newCameraPos.googleTiles();
+    const curTile = this.newCameraPos.merc2Tile();
+    this.tileStack = [];
     // console.log(curTile)
 
-
-
+  //find new tiles from the new position
   let f,h,k;
   let g = k = this.tileIncrement*-1;
     for(f=0; f<CALCULATE_TILE_DISTANCE ; f++){
 
       for(h=0; h<CALCULATE_TILE_DISTANCE ; h++){
         this.tileStack.push([g,k]);
+        // console.log([g,k])
         k++;
       }
       k = this.tileIncrement*-1;
@@ -100,18 +101,26 @@ class MovementWatcher {
       // console.log(curTile)
       e[0] = curTile[0]+e[0];
       e[1] = curTile[1]+e[1];
+
+
     });
+    // console.log(this.tileStack.length)
+    // this.joiningTiles.forEach( e => console.log(e.tileCoords));
 
     this.joiningTilesBlocked = true;
+
     let neededTile = false;
     let i,j;
     let oldElement,newElement;
 
+    // console.log(this.joiningTiles.length)
     for(i=0; i<this.joiningTiles.length ; i++){
       oldElement= this.joiningTiles[i];
 
+
       for(j=0; j<this.tileStack.length ; j++){
         newElement = this.tileStack[j];
+
 
         if(oldElement.tileCoords[0] === newElement[0] && oldElement.tileCoords[1] === newElement[1]){
           neededTile=true;
@@ -121,17 +130,20 @@ class MovementWatcher {
       };
       if(!neededTile){
         this.joiningTiles.splice(i,1);
-        // oldElement.destroy();
+        if(oldElement.isLoaded){
+          // oldElement.destroy();
+        }
         i--;
       }
       neededTile=false;
     }
-    // console.log(this.joiningTiles)
+    // console.log(this.tileStack)
+    this.tileStack.forEach( e => { this.joiningTiles.push(new Tile(this.origin,e)) });
 
-    this.tileStack.forEach( e => this.joiningTiles.push(new Tile(this.origin,e)));
     this.joiningTilesBlocked = false;
 
-    // this.joiningTiles.forEach( e => console.log(e));
+    console.log(this.joiningTiles.length)
+
     // console.log("------")
 
   }
@@ -153,67 +165,45 @@ class MovementWatcher {
 //   [curTile[0]-2, curTile[1]+2], [curTile[0]-1, curTile[1]+2], [curTile[0], curTile[1]+2], [curTile[0]+1, curTile[1]+2], [curTile[0]+2, curTile[1]+2],
 // ];
 
-// const helpArry = [];
-
 /*
 
-erstellen einer vorzeichen matrix
+create sign matrix
+------------------
 
-geg: 5 und 2 und loopnummer        geg: 3 und 1 und 9(wegen3*3) und loopnummer
-[-,- ,-,- ,+,- ,+,- ,+,-]       [-,-,+,-,+,-]    [[-,-],[+,-],[+,-],   [-,-,+,-,+,-,-,+,+,+ ,+ ,+ ,- ,+ ,+ ,+ ,+ ,+]
-[-,- ,-,- ,+,- ,+,- ,+,-]       [-,+,+,+,+,+]    [-,+],[+,+],[+,+],   [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]
-[-,+ ,-,+ ,+,+ ,+,+ ,+,+]       [-,+,+,+,+,+]    [-,+],[+,+],[+,+]]   [0,1,2,3,4,5,6,7,8, 9,10,11,12,13,14,15,...]
-[-,+ ,-,+ ,+,+ ,+,+ ,+,+]
-[-,+ ,-,+ ,+,+ ,+,+ ,+,+]       [-,-,-,-,+,-,+,-,+,- ,- ,- ,- ,- ,+ ,- ,+ ,- ,+ ,- ,- , +, -, +, +, +, +, +, +, +,-,+ ,-,+ ,+,+ ,+,+ ,+,+,-,+ ,-,+ ,+,+ ,+,+ ,+,+]
-                                [0,1,2,3,4,5,6,7,8,9 ,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,31]
+given: five from CALCULATE_TILE_DISTANCE and two from Math.floor(CALCULATE_TILE_DISTANCE/2) and loopnumber
+where CALCULATE_TILE_DISTANCE is a free(uneven) chosen number
 
-[
-[-,-],
-[+,-],
-[+,-],
-[-,+],
-[+,+],
-[+,+],
-[-,+],
-[+,+],
-[+,+]
-]
+mercator
+--------
 
-[
--,
--,
-+,
--,
-+,
--,
--,
-+,
-+,
-+,
-+,
-+,
--,
-+,
-+,
-+,
-+,
-+
-]
+3x3
 
+[-1,+1],[0,+1],[+1,+1],
+[-1,0], [0,0], [+1,0],
+[-1,-1],[0,-1],[+1,-1],
+
+
+5x5
+
+[-2,+2],[-1,+2],[0,+2],[+1,+2],[+2,+2],
+[-2,+1],[-1,+1],[0,+1],[+1,+1],[+2,+1],
+[-2,0] ,[-1,0] ,[0,0] ,[+1,0] ,[+2,0] ,
+[-2,-1],[-1,-1],[0,-1],[+1,-1],[+2,-1],
+[-2,-2],[-1,-2],[0,-2],[+1,-2],[+2,-2],
+
+compare google and mercator: y-value sign is switched from bottom to top and vice versa
+
+
+google
+------
+
+5x5 google
 
 [-2,-2] [-1,-2] [0,-2] [+1,-2] [+2,-2]
 [-2,-1] [-1,-1] [0,-1] [+1,-1] [+2,-1]
 [-2,0 ] [-1,0 ] [0,0 ] [+1,0 ] [+2,0 ]
 [-2,+1] [-1,+1] [0,+1] [+1,+1] [+2,+1]
 [-2,+2] [-1,+2] [0,+2] [+1,+2] [+2,+2]
-
-   [+1,-2] [+2,-2]
-   [+1,-1] [+2,-1]
-   [+1,0 ] [+2,0 ]
-    [+2,+1]
-   [+1,+2]
-
-
 
 
 zweite zahl erhöht sich ums eins

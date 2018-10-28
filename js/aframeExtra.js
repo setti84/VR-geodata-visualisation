@@ -4,10 +4,10 @@ AFRAME.registerComponent('cameralistener', {
 
   init: function () {
 
-    this.originLatLng = new LatLng(52.545584 , 13.355818);   //Berlin beuth
+    this.originLatLng = new LatLng( 52.54591075494661, 13.355914950370789 );   //Berlin beuth
     // this.originLatLng = new LatLng(40.72372, -73.98922);   // New York
     // this.originLatLng = new LatLng(1.29422,103.85411);        // Singapore
-    // this.originLatLng = new LatLng(-30.0001,-30.101);
+    // this.originLatLng = new LatLng(0,0);
 
 
 
