@@ -13,8 +13,6 @@ class Tile {
     const bounds = this.bounds = this.tileBounds(this.tileCoords,this.origin.zoom);
     this.tileMiddle = this.gettileMiddle(bounds);
     this.calculateDistanceToOrrigin(origin);
-    // console.log(document.querySelector('a-assets').fileLoader);
-
   }
 
   create () {
@@ -38,7 +36,7 @@ class Tile {
     this.tilePlane.object3D.position.set(-1*pos[0],0,pos[1]);
     this.tilePlane.setAttribute('rotation', {x:-90, y:0, z:0});
     this.tilePlane.setAttribute('id', x + "a" + y);
-    this.tilePlane.addEventListener('loaded', (evt) => {
+    this.tilePlane.addEventListener('loaded', () => {
       this.isLoaded = true;
     });
 
@@ -56,23 +54,11 @@ class Tile {
     //   this.tilecoords[1] + "/" +
     //   this.tilecoords[0]);
 
-    texture.addEventListener('load', e => {
-      // testiobj++;
-      // console.log(testiobj)
+    texture.addEventListener('load', () => {
       document.querySelector('a-assets').appendChild(texture);
       this.tilePlane.setAttribute('material', { src: '#' + x + "a" + y});
       this.scene.appendChild(this.tilePlane);
-      // console.log("texture : " + e.target.id)
-      // console.log(this.tileCoords)
-      // console.log(this)
     });
-
-
-
-
-
-
-
 
   }
 
@@ -128,53 +114,23 @@ class Tile {
 
   destroy () {
 
-    // this.tilePlane.setAttribute('material', {color: 'black'});
-    // this.tilePlane = 0;
-
-
-
-// console.log(this.isLoaded)
     if(this.isLoaded){
-      // console.log("destroy")
-      // console.log(this.isLoaded)
-      // console.log(this.tilePlane)
       this.tilePlane.parentNode.removeChild(this.tilePlane);
       if(DEBUGGING){
         this.tileText.parentNode.removeChild(this.tileText);
       }
     } else {
-      console.log("not loaded yet, status: " + this.isLoaded)
-
       const waiting = setInterval( () => {
-        console.log("in interval")
         if(this.isLoaded){
           this.tilePlane.parentNode.removeChild(this.tilePlane);
           if(DEBUGGING){
             this.tileText.parentNode.removeChild(this.tileText);
           }
           clearTimeout(waiting);
-
-          console.log("clear interval, tile removed ")
         }
       } , 200);
-
-
-
     }
 
-
-
-
-
-    // console.log(this.tilePlane)
-    // if(this.tilePlane){
-    //   this.scene.removeChild(this.tilePlane);
-    // }
-
-    /*
-    get rid of tiletext
-    get rid of texture
-    get rid of geometry
-     */
   }
+
 }

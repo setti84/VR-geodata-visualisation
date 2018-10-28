@@ -12,7 +12,6 @@ class LatLng {
     this.lat = newLat;
     this.lng = newLng;
     this.mercatorCoord = this.wgs2Mercator();
-
   }
 
   toString(){
@@ -39,9 +38,6 @@ class LatLng {
   }
 
   googleTiles () {
-    // console.log(this.merc2Tile())
-    // console.log([this.merc2Tile()[0], (Math.pow(2,this.zoom) - 1) - this.merc2Tile()[1]])
-
     return [this.merc2Tile()[0], (Math.pow(2,this.zoom) - 1) - this.merc2Tile()[1]]
   }
 

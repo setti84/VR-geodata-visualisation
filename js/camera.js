@@ -5,9 +5,9 @@ class Camera {
     this.originlatLon = latLng;
     this.originMercator = this.originlatLon.wgs2Mercator();
     this.newLatLng = new LatLng(latLng.lat, latLng.lng);
-    this.totalPosDelta = new THREE.Vector3();
     this.movementWatcher = new MovementWatcher(this.originlatLon, this.newLatLng);
-    const camDom =document.querySelector('#camera');
+    const camDom = document.querySelector('#camera');
+
     camDom.setAttribute('wasd-controls', { acceleration: MOVINGFACTOR });
     camDom.object3D.position.set(camDom.object3D.position.x, CAMERAHEIGHT, camDom.object3D.position.z);
 
@@ -18,25 +18,18 @@ class Camera {
   }
 
   setPosition (positionDelta){
-    const temp = Util.unprojectWorldCoordinates(this.newLatLng.wgs2Mercator()[0]+positionDelta.x, this.newLatLng.wgs2Mercator()[1]+positionDelta.z);
-    this.newLatLng.setCoords(temp[0], temp[1]);
-    // console.log(this.newLatLng)
+
+      // TODO map-scaling here?
+      // "Converts XY point from Spherical Mercator EPSG:900913 and the change from a-frame camera position to lat/lon in WGS84 Datum"
+      const lng = ((this.newLatLng.wgs2Mercator()[0]+positionDelta.x) / ORIGINSHIFT) * 180;
+      let lat = ((this.newLatLng.wgs2Mercator()[1]+positionDelta.z) / ORIGINSHIFT) * 180;
+      lat = 180 / Math.PI * (2 * Math.atan(Math.exp(lat * Math.PI / 180)) - Math.PI / 2);
+      this.newLatLng.setCoords(lat, lng);
+
   }
 
   getPosition(){
     return this.newLatLng;
-  }
-
-  setTotalPosDelta (vector) {
-    this.totalPosDelta = vector;
-  }
-
-  getTotalPosDelta () {
-    return this.totalPosDelta;
-  }
-
-  getOffset() {
-    return this.originMercator
   }
 
 }
