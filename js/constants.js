@@ -6,7 +6,7 @@ const DEBUGGING = true;
 
 const ZOOMLEVEL = 20; // 19
 const SCALEFACTOR = 1;
-const MOVINGFACTOR = 1200; // normal is 65
-const CAMERAHEIGHT = 180; // 100
-const LOADING_TILE_DISTANCE = 200; //in meter 500
-const CALCULATE_TILE_DISTANCE = 15; // Amount of tiles get loaded around the origin, only use positive uneven numbers e.g. 3,5 or 7
+const MOVINGFACTOR = 2200; // normal is 65
+const CAMERAHEIGHT = 20; // 100
+const LOADING_TILE_DISTANCE = 300; //in meter 500
+const CALCULATE_TILE_DISTANCE = 5; // Amount of tiles get loaded around the origin, only use positive uneven numbers e.g. 3,5 or 7

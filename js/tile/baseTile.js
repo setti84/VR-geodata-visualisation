@@ -1,22 +1,16 @@
-class Tile {
-  // Tiles are square flat polygons with with a rendered map view as a texture
+class BaseTile extends Tile{
+  // BaseMapTile are square flat polygons with with a rendered map view as a texture
 
-  constructor (origin, coords) {
+  constructor (origin,coords) {
 
-    this.origin = origin;
-    this.tileCoords = coords;
-    this.isLoaded = false;
-    this.isLoading = false;
-    this.distanceToOrigin = 100; // random value set
-    this.scene = document.querySelector('a-scene');
-
-    const bounds = this.bounds = this.tileBounds(this.tileCoords,this.origin.zoom);
+    super(origin,coords);
+    const bounds = this.bounds = this.tileBounds();
     this.tileMiddle = this.gettileMiddle(bounds);
-    this.calculateDistanceToOrrigin(origin);
+    this.calculateDistanceToOrigin(origin);
   }
 
   create () {
-
+    // creates a flat geometry with the needed map tile as a texture
     this.isLoading = true;
     const x = this.tileCoords[0];
     const y = (Math.pow(2,this.origin.zoom) -1) - this.tileCoords[1];
@@ -38,6 +32,7 @@ class Tile {
     this.tilePlane.setAttribute('id', x + "a" + y);
     this.tilePlane.addEventListener('loaded', () => {
       this.isLoaded = true;
+      // console.log(this.tilePlane)
     });
 
     const texture = document.createElement('img');
@@ -70,21 +65,7 @@ class Tile {
 
   }
 
-  tileBounds(){
-    // tile = [tx, ty] = tilecoordinates
-    // "Returns bounds of the given tile in EPSG:900913 coordinates"
-    const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,this.origin.zoom));
-
-    const minX = this.tileCoords[0]*TILE_SIZE*res-ORIGINSHIFT;
-    const maxX = (this.tileCoords[0]+1)*TILE_SIZE*res-ORIGINSHIFT;
-    const minY = this.tileCoords[1]*TILE_SIZE*res-ORIGINSHIFT;
-    const maxY = (this.tileCoords[1]+1)*TILE_SIZE*res-ORIGINSHIFT;
-
-    return [minX, maxX, minY, maxY];
-
-  }
-
-  calculateDistanceToOrrigin(newCameraPos){
+  calculateDistanceToOrigin(newCameraPos){
     // Pythagorean theorem to get the distance to the camera
     this.distanceToOrigin = Math.sqrt(Math.pow((newCameraPos.wgs2Mercator()[0]-this.tileMiddle[0]), 2) + Math.pow((newCameraPos.wgs2Mercator()[1]-this.tileMiddle[1]), 2));
 
@@ -96,8 +77,8 @@ class Tile {
     this.tileText = document.createElement('a-text');
     const scale = 15;
     const text = "G: " + x + "/" + y +
-                 "\n TMS: " + this.tileCoords[0] + "/" + this.tileCoords[1] +
-                 "\n Zoom: " + this.origin.zoom;
+      "\n TMS: " + this.tileCoords[0] + "/" + this.tileCoords[1] +
+      "\n Zoom: " + this.origin.zoom;
 
     this.tileText.setAttribute('position', {x:-1*pos[0], y:0.5, z:pos[1]});
     this.tileText.setAttribute('align', 'center');

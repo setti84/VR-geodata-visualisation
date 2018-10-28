@@ -41,4 +41,12 @@ class LatLng {
     return [this.merc2Tile()[0], (Math.pow(2,this.zoom) - 1) - this.merc2Tile()[1]]
   }
 
+  static unprojectWorldCoordinates(x, y) {
+    // "Converts XY point from Spherical Mercator EPSG:900913 to lat/lon in WGS84 Datum"
+    const lng = (x / ORIGINSHIFT) * 180;
+    let lat = (y / ORIGINSHIFT) * 180;
+    lat = 180 / Math.PI * (2 * Math.atan(Math.exp(lat * Math.PI / 180)) - Math.PI / 2);
+    return [lat, lng]
+  }
+
 }

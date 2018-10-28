@@ -23,7 +23,7 @@ class MovementWatcher {
     if (this.joiningTilesBlocked) return;
 
     this.joiningTiles.forEach(e => {
-      e.calculateDistanceToOrrigin(this.newCameraPos);
+      e.calculateDistanceToOrigin(this.newCameraPos);
       if (e.distanceToOrigin < LOADING_TILE_DISTANCE && !e.isLoading) {
         e.create();
       }
@@ -108,7 +108,7 @@ class MovementWatcher {
     // the new needed tile numbers become proper tiles and get pushed to the old tile stack. Tiles get loaded later.
     // Only from this point there are available for distance calculation and therefore check if get loaded(visualized) or not
     this.tileStack.forEach(e => {
-      this.joiningTiles.push(new Tile(this.origin, e))
+      this.joiningTiles.push(new BaseTile(this.origin, e))
     });
 
     this.joiningTilesBlocked = false;
