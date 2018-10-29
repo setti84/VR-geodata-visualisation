@@ -16,45 +16,40 @@ class BaseTile extends Tile{
     const y = (Math.pow(2,this.origin.zoom) -1) - this.tileCoords[1];
     let size = this.bounds[1] - this.bounds[0];
     const pos = [this.origin.wgs2Mercator()[0]-this.tileMiddle[0], this.origin.wgs2Mercator()[1]-this.tileMiddle[1]];
+
     if(DEBUGGING){
       this.showTileNumber(pos,x,y);
       size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
     }
 
-    this.tilePlane = document.createElement('a-entity');
-    this.tilePlane.setAttribute('geometry', {
-      primitive: 'plane',
-      height:size,
-      width: size
-    });
-    this.tilePlane.object3D.position.set(-1*pos[0],0,pos[1]);
-    this.tilePlane.setAttribute('rotation', {x:-90, y:0, z:0});
-    this.tilePlane.setAttribute('id', x + "a" + y);
-    this.tilePlane.addEventListener('loaded', () => {
+    const link2 = `http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${this.origin.zoom}/${x}/${y}`;
+
+    const link = `https://api.tiles.mapbox.com/v4/setti.411b5377/${this.origin.zoom}/${x}/${y}.png` +
+    '?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A';
+
+    this.loadTexture(link).then( (res, err) => {
+      if(err) return;
+
+      const material = new THREE.MeshBasicMaterial( { map: res } );
+
+      const geometry = new THREE.PlaneGeometry( size, size );
+      this.mesh = new THREE.Mesh( geometry, material );
+
+      this.mesh.rotation.x = -Math.PI / 2; // 90 degree
+      this.mesh.position.set(-1*pos[0],0,pos[1]);
+
+      this.threeScene.add(this.mesh);
+
       this.isLoaded = true;
-      // console.log(this.tilePlane)
+
     });
 
-    const texture = document.createElement('img');
-    texture.setAttribute('id', x + "a" + y);
-    texture.setAttribute('crossorigin', "anonymous" );
-    texture.setAttribute('src', "https://api.tiles.mapbox.com/v4/setti.411b5377/" +
-      this.origin.zoom + "/" +
-      x + "/" +
-      y +
-      ".png?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A");
+  }
 
-    // texture.setAttribute('src', "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/" +
-    //   this.origin.zoom + "/" +
-    //   this.tilecoords[1] + "/" +
-    //   this.tilecoords[0]);
-
-    texture.addEventListener('load', () => {
-      document.querySelector('a-assets').appendChild(texture);
-      this.tilePlane.setAttribute('material', { src: '#' + x + "a" + y});
-      this.scene.appendChild(this.tilePlane);
+  loadTexture(url) {
+    return new Promise(resolve => {
+      new THREE.TextureLoader().load(url, resolve);
     });
-
   }
 
   gettileMiddle (bounds) {
@@ -96,14 +91,18 @@ class BaseTile extends Tile{
   destroy () {
 
     if(this.isLoaded){
-      this.tilePlane.parentNode.removeChild(this.tilePlane);
+      this.threeScene.remove(this.mesh);
+      this.mesh.geometry.dispose();
+      this.mesh.material.dispose();
       if(DEBUGGING){
         this.tileText.parentNode.removeChild(this.tileText);
       }
     } else {
       const waiting = setInterval( () => {
         if(this.isLoaded){
-          this.tilePlane.parentNode.removeChild(this.tilePlane);
+          this.threeScene.remove(this.mesh);
+          this.mesh.geometry.dispose();
+          this.mesh.material.dispose();
           if(DEBUGGING){
             this.tileText.parentNode.removeChild(this.tileText);
           }
@@ -115,3 +114,69 @@ class BaseTile extends Tile{
   }
 
 }
+
+
+
+// if(this.isLoaded){
+//   this.tilePlane.parentNode.removeChild(this.tilePlane);
+//   if(DEBUGGING){
+//     this.tileText.parentNode.removeChild(this.tileText);
+//   }
+// } else {
+//   const waiting = setInterval( () => {
+//     if(this.isLoaded){
+//       this.tilePlane.parentNode.removeChild(this.tilePlane);
+//       if(DEBUGGING){
+//         this.tileText.parentNode.removeChild(this.tileText);
+//       }
+//       clearTimeout(waiting);
+//     }
+//   } , 200);
+// }
+
+
+
+// this.tilePlane = document.createElement('a-entity');
+// this.tilePlane.setAttribute('geometry', {
+//   primitive: 'plane',
+//   height:size,
+//   width: size
+// });
+// this.tilePlane.object3D.position.set(-1*pos[0],0,pos[1]);
+// this.tilePlane.setAttribute('rotation', {x:-90, y:0, z:0});
+// this.tilePlane.setAttribute('id', x + "a" + y);
+// this.tilePlane.addEventListener('loaded', () => {
+//   this.isLoaded = true;
+//   // console.log(this.tilePlane)
+// });
+
+
+
+
+
+
+// const texture = document.createElement('img');
+// texture.setAttribute('id', x + "a" + y);
+// texture.setAttribute('crossorigin', "anonymous" );
+// texture.setAttribute('src', `https://api.tiles.mapbox.com/v4/setti.411b5377/${this.origin.zoom}/${x}/${y}.png` +
+//   "?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A");
+//
+
+
+
+
+// // texture.setAttribute('src', "https://api.tiles.mapbox.com/v4/setti.411b5377/${this.origin.zoom}" + this.origin.zoom + "/" +
+// //   x + "/" +
+// //   y +
+// //   ".png?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A");
+//
+// // texture.setAttribute('src', "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/" +
+// //   this.origin.zoom + "/" +
+// //   this.tilecoords[1] + "/" +
+// //   this.tilecoords[0]);
+//
+// texture.addEventListener('load', () => {
+//   document.querySelector('a-assets').appendChild(texture);
+//   this.tilePlane.setAttribute('material', { src: '#' + x + "a" + y});
+//   this.scene.appendChild(this.tilePlane);
+// });

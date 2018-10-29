@@ -1,6 +1,8 @@
-class LatLng {
+class LatLng extends Point{
 
-  constructor (lat, lng) {
+  constructor (lat = 0, lng = 0, x,y) {
+    // TODO: use x and y for mercator
+    super(x,y);
     this.lat = lat;
     this.lng = lng;
     this.zoom = ZOOMLEVEL;

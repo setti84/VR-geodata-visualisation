@@ -19,17 +19,28 @@ class DataTile extends Tile {
 
   processData (res) {
 
+    // var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+
     console.log(res);
+
+    const data = osmtogeojson(res);
+
+
+    console.log(data)
+
+    data.features.forEach( e => {
+      console.log(e )
+    } );
 
     // res.elements.forEach( e => console.log(e))
 
 
     // console.log(this.scene)
 
-    var geometry = new THREE.BoxGeometry(3, 7, 19 );
-    var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-    var cube = new THREE.Mesh( geometry, material );
-    this.scene.object3D.add(cube);
+    // var geometry = new THREE.BoxGeometry(3, 7, 19 );
+    //
+    // var cube = new THREE.Mesh( geometry, material );
+    // this.scene.object3D.add(cube);
 
   }
 
@@ -43,8 +54,6 @@ class DataTile extends Tile {
       const tilecoords = this.tileBounds();
 
       const tileborder = LatLng.unprojectWorldCoordinates(tilecoords[0], tilecoords[2]).concat(LatLng.unprojectWorldCoordinates(tilecoords[1], tilecoords[3]));
-
-
 
       const httpRequest = new XMLHttpRequest();
       const url =  'http://overpass-api.de/api/interpreter?data='; // 'https://data.sebastiansettgast.com/sprite.json';
@@ -87,6 +96,33 @@ class DataTile extends Tile {
   }
 
 }
+
+/*
+
+three js geometries
+
+https://stackoverflow.com/questions/50077508/three-js-indexed-buffergeometry-vs-instancedbuffergeometry
+
+Three.js indexed BufferGeometry
+
+ for many different geometries, better rthan standard geometry type
+
+
+InstancedBufferGeometry
+
+if many geometries share something like a lot of arrows in the example below
+or many trees in a scene with the same shape
+
+
+https://codepen.io/usefulthink/pen/YNrvpY?editors=0010
+
+
+
+
+
+
+
+ */
 
 /*
 

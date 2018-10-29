@@ -13,3 +13,17 @@ function changeCoordinatesDisplay(cam) {
   ;
 
 }
+
+
+// setTimeout( () => {
+//
+//   const allObjects = document.querySelector('a-scene').object3D.children;
+//   // console.log(allObjects)
+//
+//   allObjects.forEach( e => {
+//     // console.log("resize")
+//     // e.scale.set(SCALEFACTOR,SCALEFACTOR , SCALEFACTOR);
+//   })
+//
+//
+// },2000);

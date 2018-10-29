@@ -1,2 +1,3 @@
-# aframeCameraPosition
-check of camera position in lat lon coordinates
+# Visualisation of geodata with A-Frame
+
+This website was created in the class of Interaktive Geomediengestaltung at the Beuth university in Winter 2018.
