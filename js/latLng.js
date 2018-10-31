@@ -1,11 +1,11 @@
 class LatLng extends Point{
 
-  constructor (lat = 0, lng = 0, x,y) {
+  constructor (lat = 0, lng = 0, zoom = 17, x,y) {
     // TODO: use x and y for mercator
     super(x,y);
     this.lat = lat;
     this.lng = lng;
-    this.zoom = ZOOMLEVEL;
+    this.zoom = zoom;
     this.mercatorCoord = this.wgs2Mercator();
 
   }

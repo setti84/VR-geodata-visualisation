@@ -1,5 +1,5 @@
 class BaseTile extends Tile{
-  // BaseMapTile are square flat polygons with with a rendered map view as a texture
+  // BaseMapTile are square flat polygons with with a rendered map as a texture
 
   constructor (origin,coords) {
 
@@ -22,18 +22,18 @@ class BaseTile extends Tile{
       size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
     }
 
-    const link2 = `http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${this.origin.zoom}/${x}/${y}`;
+    const link3 = `https://tiles.codefor.de/berlin-2018/${this.origin.zoom}/${x}/${y}.png`
+
+    const link2 = `http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${this.origin.zoom}/${y}/${x}`;
 
     const link = `https://api.tiles.mapbox.com/v4/setti.411b5377/${this.origin.zoom}/${x}/${y}.png` +
     '?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A';
 
+
     this.loadTexture(link).then( (res, err) => {
       if(err) return;
 
-      const material = new THREE.MeshBasicMaterial( { map: res } );
-
-      const geometry = new THREE.PlaneGeometry( size, size );
-      this.mesh = new THREE.Mesh( geometry, material );
+      this.mesh = new THREE.Mesh( new THREE.PlaneGeometry( size, size ), new THREE.MeshBasicMaterial( { map: res } ) );
 
       this.mesh.rotation.x = -Math.PI / 2; // 90 degree
       this.mesh.position.set(-1*pos[0],0,pos[1]);
@@ -41,6 +41,7 @@ class BaseTile extends Tile{
       this.threeScene.add(this.mesh);
 
       this.isLoaded = true;
+
 
     });
 

@@ -1,5 +1,6 @@
 class Tile {
   constructor (origin, coords) {
+
     this.origin = origin;
     this.tileCoords = coords;
     this.isLoaded = false;

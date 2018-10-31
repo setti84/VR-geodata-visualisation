@@ -4,12 +4,13 @@ class Camera {
 
     this.originlatLon = latLng;
     this.originMercator = this.originlatLon.wgs2Mercator();
-    this.newLatLng = new LatLng(latLng.lat, latLng.lng);
+    this.newLatLng = new LatLng(latLng.lat, latLng.lng, latLng.zoom);
     this.movementWatcher = new MovementWatcher(this.originlatLon, this.newLatLng);
     const camDom = document.querySelector('#camera');
 
     camDom.setAttribute('wasd-controls', { acceleration: MOVINGFACTOR });
     camDom.object3D.position.set(camDom.object3D.position.x, CAMERAHEIGHT, camDom.object3D.position.z);
+    // console.log(camDom.object3D.position)
 
   }
 

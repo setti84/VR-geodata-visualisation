@@ -7,7 +7,8 @@ class DataTile extends Tile {
   }
 
   create() {
-    //  create objects with three js
+    this.isLoading = true;
+
     this.loadData().then( (res, err) => {
       if(err) return;
 
@@ -41,6 +42,9 @@ class DataTile extends Tile {
     //
     // var cube = new THREE.Mesh( geometry, material );
     // this.scene.object3D.add(cube);
+
+
+    this.isLoaded = true;
 
   }
 
@@ -92,6 +96,27 @@ class DataTile extends Tile {
   }
 
   destroy() {
+
+    if(this.isLoaded){
+      this.threeScene.remove(this.mesh);
+      this.mesh.geometry.dispose();
+      this.mesh.material.dispose();
+      if(DEBUGGING){
+        this.tileText.parentNode.removeChild(this.tileText);
+      }
+    } else {
+      const waiting = setInterval( () => {
+        if(this.isLoaded){
+          this.threeScene.remove(this.mesh);
+          this.mesh.geometry.dispose();
+          this.mesh.material.dispose();
+          if(DEBUGGING){
+            this.tileText.parentNode.removeChild(this.tileText);
+          }
+          clearTimeout(waiting);
+        }
+      } , 200);
+    }
 
   }
 
