@@ -1,12 +1,13 @@
 class BaseTile extends Tile{
   // BaseMapTile are square flat polygons with with a rendered map as a texture
 
-  constructor (origin,coords) {
+  constructor (origin, coords) {
 
     super(origin,coords);
     const bounds = this.bounds = this.tileBounds();
     this.tileMiddle = this.gettileMiddle(bounds);
     this.calculateDistanceToOrigin(origin);
+
   }
 
   create () {
@@ -22,35 +23,32 @@ class BaseTile extends Tile{
       size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
     }
 
-    const link3 = `https://tiles.codefor.de/berlin-2018/${this.origin.zoom}/${x}/${y}.png`
 
-    const link2 = `http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${this.origin.zoom}/${y}/${x}`;
+
+    // TODO: Tiles from codefor and link4 not working
+    // https://leaflet-extras.github.io/leaflet-providers/preview/
 
     const link = `https://api.tiles.mapbox.com/v4/setti.411b5377/${this.origin.zoom}/${x}/${y}.png` +
     '?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A';
+    const link2 = `http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${this.origin.zoom}/${y}/${x}`;
+    const link3 = `https://a.basemaps.cartocdn.com/light_nolabels/${this.origin.zoom}/${x}/${y}.png`;
+    const link4 = `https://a.basemaps.cartocdn.com/rastertiles/voyager_nolabels/${this.origin.zoom}/${x}/${y}.png`;
 
+    // const link5 = `https://tiles.codefor.de/berlin-2018/${this.origin.zoom}/${x}/${y}.png`;
+    // const link6 = `https://a.tile.openstreetmap.se/hydda/base/${this.origin.zoom}/${x}/${y}.png`;
 
-    this.loadTexture(link).then( (res, err) => {
-      if(err) return;
-
-      this.mesh = new THREE.Mesh( new THREE.PlaneGeometry( size, size ), new THREE.MeshBasicMaterial( { map: res } ) );
+    map.textureManager.loadTexture(link4).then( res => {
+      
+      this.texture = res;
+      this.mesh = new THREE.Mesh( new THREE.PlaneGeometry( size, size ), new THREE.MeshBasicMaterial( { map: this.texture } ) );
 
       this.mesh.rotation.x = -Math.PI / 2; // 90 degree
       this.mesh.position.set(-1*pos[0],0,pos[1]);
-
       this.threeScene.add(this.mesh);
-
       this.isLoaded = true;
 
+    }).catch( err => console.log(err));
 
-    });
-
-  }
-
-  loadTexture(url) {
-    return new Promise(resolve => {
-      new THREE.TextureLoader().load(url, resolve);
-    });
   }
 
   gettileMiddle (bounds) {
@@ -93,8 +91,10 @@ class BaseTile extends Tile{
 
     if(this.isLoaded){
       this.threeScene.remove(this.mesh);
-      this.mesh.geometry.dispose();
+      this.texture.dispose();
       this.mesh.material.dispose();
+      this.mesh.geometry.dispose();
+
       if(DEBUGGING){
         this.tileText.parentNode.removeChild(this.tileText);
       }
@@ -102,8 +102,10 @@ class BaseTile extends Tile{
       const waiting = setInterval( () => {
         if(this.isLoaded){
           this.threeScene.remove(this.mesh);
-          this.mesh.geometry.dispose();
+          this.texture.dispose();
           this.mesh.material.dispose();
+          this.mesh.geometry.dispose();
+
           if(DEBUGGING){
             this.tileText.parentNode.removeChild(this.tileText);
           }
@@ -115,6 +117,44 @@ class BaseTile extends Tile{
   }
 
 }
+
+
+//     // instantiate a loader
+//     var loader = new THREE.TextureLoader();
+// //
+//     loader.load(
+//       // resource URL
+//       link,
+//
+//       // onLoad callback
+//       ( texture ) => {
+//         // in this example we create the material when the texture is loaded
+//         console.log(texture)
+//
+//         this.texture = texture;
+//
+//           this.mesh = new THREE.Mesh( new THREE.PlaneGeometry( size, size ), new THREE.MeshBasicMaterial( { map: texture } ) );
+//           console.log(this.mesh)
+//
+//           this.mesh.rotation.x = -Math.PI / 2; // 90 degree
+//           this.mesh.position.set(-1*pos[0],0,pos[1]);
+//
+//           this.threeScene.add(this.mesh);
+//           console.log(this.threeScene)
+//
+//           this.isLoaded = true
+//
+//       },
+//
+//       // onProgress callback currently not supported
+//       undefined,
+//
+//       // onError callback
+//       function ( err ) {
+//         console.error( 'An error happened.' );
+//         console.log(err)
+//       }
+//     );
 
 
 

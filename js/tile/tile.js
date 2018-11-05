@@ -23,4 +23,9 @@ class Tile {
     return [minX, maxX, minY, maxY];
 
   }
+
+  // loadTexture(url) {
+  //   return new Promise(resolve => map.get().textureLoader.load(url, resolve));
+  // }
+
 }

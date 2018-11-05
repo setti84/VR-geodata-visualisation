@@ -1,5 +1,5 @@
 
-AFRAME.registerComponent('cameralistener', {
+AFRAME.registerComponent('camerascanner', {
   schema: {type: 'string'},
 
   init: function () {
@@ -13,6 +13,7 @@ AFRAME.registerComponent('cameralistener', {
       this.newPos = this.el.object3D.getWorldPosition();
       posDelta.set(this.newPos.x-this.oldPos.x, 0, (this.newPos.z-this.oldPos.z)*-1);
       this.cam.setPosition(posDelta);
+      // TODO: call this not every movement... maybe just every fifth loop
       this.cam.getMovementWatcher().search();
       changeCoordinatesDisplay(this.cam);
       this.oldPos = this.el.object3D.getWorldPosition();

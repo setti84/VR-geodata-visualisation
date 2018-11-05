@@ -7,21 +7,22 @@ class MapApp {
     this.debugging = options.debugging || false;
     this.maptiles = options.maptiles || 'mapbox';
     this.events = new Events();
+    // this.textureLoader = new THREE.TextureLoader();
+    this.textureManager = new TextureManager();
+    // TODO: array(or map object?) with mother object for tiles? like plane geometry, building geometry, everything we need more than once for tiles?
+    // TODO: Scaling: buildings should be closer together, maptiles needs to be improved
 
-    // this.originLatLng = new LatLng( 52.54591075494661, 13.355914950370789 );   //Berlin beuth
-    // this.originLatLng = new LatLng(40.72372, -73.98922);   // New York
-    // this.originLatLng = new LatLng(1.29422,103.85411);        // Singapore
-    // this.originLatLng = new LatLng(0,0);
-    // this.originLatLng = new LatLng( 52.54591075494661, 13.355914950370789 );
-
-    var testi = new DataTile(this.originLatLng, [563187, 704813]);
-    testi.create();
+    // var testi = new DataTile(this.position, [563187, 704813]);
+    // testi.create();
 
 
+    // TODO: its not working, mabe use set interval to keep track of href and map position
     const startPos = window.location.href.split("/");
+    // console.log(startPos)
     if(startPos.length === 8){
       // http://localhost/git/aframeCameraPosition/#/19/56
       this.position = new LatLng( startPos[startPos.length-1], startPos[startPos.length-2], this.zoom );
+      console.log(this.position)
     }
 
     // this.cam = new Camera(this.position);
@@ -36,6 +37,8 @@ class MapApp {
 
 
 /*
+
+
 
 performance
 

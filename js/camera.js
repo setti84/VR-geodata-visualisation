@@ -7,6 +7,7 @@ class Camera {
     this.newLatLng = new LatLng(latLng.lat, latLng.lng, latLng.zoom);
     this.movementWatcher = new MovementWatcher(this.originlatLon, this.newLatLng);
     const camDom = document.querySelector('#camera');
+    console.log(    this.threeScene = document.querySelector('a-scene').object3D)
 
     camDom.setAttribute('wasd-controls', { acceleration: MOVINGFACTOR });
     camDom.object3D.position.set(camDom.object3D.position.x, CAMERAHEIGHT, camDom.object3D.position.z);
@@ -20,11 +21,11 @@ class Camera {
 
   setPosition (positionDelta){
 
-    // TODO map-scaling here? if we change the scale here we dont change the scale for map tiles
+    // TODO map-scaling here? if we change the scale here we dont change the scale for map tiles, scaling factor from mapApp element
     // "Converts XY point from Spherical Mercator EPSG:900913 and the change from a-frame camera position to lat/lon in WGS84 Datum"
-
     const coords = LatLng.unprojectWorldCoordinates(this.newLatLng.wgs2Mercator()[0]+(positionDelta.x*SCALEFACTOR), this.newLatLng.wgs2Mercator()[1]+(positionDelta.z*SCALEFACTOR))
     this.newLatLng.setCoords(coords[0], coords[1]);
+    // console.log(camDom)
 
   }
 

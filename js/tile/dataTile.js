@@ -3,88 +3,103 @@ class DataTile extends Tile {
 
   constructor(origin, coords) {
     super(origin, coords);
+    this.buildingGroup = new THREE.Group();
+
+    //   TODO: order objects in categories (buildings,trees,...)
+    //   TODO: add texture to objects (option to turn it on and off)
+    //   TODO: use Events to check if all vector and texture data have loaded successfully
 
   }
 
   create() {
     this.isLoading = true;
 
-    this.loadData().then( (res, err) => {
-      if(err) return;
-
-      this.processData(res)
-
-    });
+    this.loadData()
+      .then(res => this.processData(res))
+      .catch(e => {
+        if(e === 429){
+          console.log(e);
+          setTimeout(() => this.loadData(),1000);
+        } });
 
   }
 
-  processData (res) {
+  processData(res) {
 
-    // var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-
-    console.log(res);
-
+    const buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5 }); //  0xcac8d2
+    const buildingHeight = 4;
+    const origin = this.origin.wgs2Mercator();
     const data = osmtogeojson(res);
 
+    data.features.forEach(feature => {
 
-    console.log(data)
+      if (feature.geometry.type === 'Polygon' && feature.properties.tags.hasOwnProperty('building')) {
+        this.creatureBuilding(feature, buildingHeight, buildingMaterial, origin);
+      } else if (false) {
 
-    data.features.forEach( e => {
-      console.log(e )
-    } );
+      }
 
-    // res.elements.forEach( e => console.log(e))
+    });
 
-
-    // console.log(this.scene)
-
-    // var geometry = new THREE.BoxGeometry(3, 7, 19 );
-    //
-    // var cube = new THREE.Mesh( geometry, material );
-    // this.scene.object3D.add(cube);
-
-
+    this.threeScene.add(this.buildingGroup);
     this.isLoaded = true;
 
   }
 
 
-
-
   loadData() {
 
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
 
       const tilecoords = this.tileBounds();
 
       const tileborder = LatLng.unprojectWorldCoordinates(tilecoords[0], tilecoords[2]).concat(LatLng.unprojectWorldCoordinates(tilecoords[1], tilecoords[3]));
 
       const httpRequest = new XMLHttpRequest();
-      const url =  'http://overpass-api.de/api/interpreter?data='; // 'https://data.sebastiansettgast.com/sprite.json';
+
+      // random numer between 1 and 4
+      const randomNum = Math.floor((Math.random() * 4) + 1)-1;
+
+      const urls = [
+        'https://overpass-api.de/api/interpreter?data=',
+        'https://lz4.overpass-api.de/api/interpreter?data=',
+        'https://overpass.openstreetmap.fr/api/interpreter?data=',
+        'https://overpass.kumi.systems/api/interpreter?data='
+      ];
+
+
+      const url = 'http://overpass-api.de/api/interpreter?data='; // 'https://data.sebastiansettgast.com/sprite.json';
       // const url = 'http://overpass-api.de/api/interpreter?data=[out%3Ajson][timeout%3A25]%3B%28node[%22highway%22%3D%22bus_stop%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Brelation[%22landuse%22%3D%22residential%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Bway[%22landuse%22%3D%22retail%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Brelation[%22landuse%22%3D%22retail%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Bway[%22landuse%22%3D%22commercial%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Brelation[%22landuse%22%3D%22commercial%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Bnode[%22highway%22%3D%22bus_stop%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3B%29%3Bout%20body%3B%3E%3Bout%20skel%20qt%3B%0A';
+
+      const url2 = 'https://lz4.overpass-api.de/api/interpreter?data=';
 
       const query = '[out:json];(' +
         'node(' + tileborder + ')["building"];'
-        +'way(' + tileborder + ')["building"];'
+        + 'way(' + tileborder + ')["building"];'
         + 'relation(' + tileborder + ')["building"];'
-        +');out body; >;out skel qt;';
+        + ');out body; >;out skel qt;';
 
-      httpRequest.open('GET', 'data/data.json'); //  url + query
+      // console.log(query)
+
+      httpRequest.open('GET', urls[randomNum] + query); //    'data/data.json'
       httpRequest.send();
 
       if (!httpRequest) {
         reject("Cannot create an XMLHTTP instance");
       }
 
-      httpRequest.onreadystatechange = () => {
+      httpRequest.onreadystatechange = (ev) => {
 
         if (httpRequest.readyState === XMLHttpRequest.DONE) {
-          if (httpRequest.status === 200) {
+          if (httpRequest.readyState==4  && httpRequest.status === 200) {
             // data has arrived
-            const resp = httpRequest.responseText;
-            const respJson = JSON.parse(resp);
-            resolve(respJson);
-          } else {
+            resolve(JSON.parse(httpRequest.responseText));
+
+          }
+          // else if(httpRequest.status === 429){
+          //   reject(httpRequest.status)
+          // }
+          else {
             // no data arrived
             // TODO: reload data? or destroy? Suggestions?
             reject(httpRequest.status);
@@ -95,29 +110,60 @@ class DataTile extends Tile {
 
   }
 
+  creatureBuilding(feature, buildingHeight, buildingMaterial, origin) {
+
+    let buildingFootprint, oRingElement = [];
+    const coordinates = feature.geometry.coordinates;
+    coordinates.forEach((ring, index) => {
+      if (index === 0) {
+        oRingElement = ring.map(x => {
+          return new THREE.Vector2(-1 * (origin[0] - util.wgs2MercX(x[0])), origin[1] - util.wgs2MercY(x[1]))
+        });
+        buildingFootprint = new THREE.Shape(oRingElement);
+      } else {
+        // these all are the inner rings of the polygon and therefore holes
+        buildingFootprint.holes.push(new THREE.Path(ring.map(x => {
+          return new THREE.Vector2(-1 * (origin[0] - util.wgs2MercX(x[0])), origin[1] - util.wgs2MercY(x[1]))
+        })));
+
+      }
+    });
+
+    var geometry = new THREE.ExtrudeGeometry(buildingFootprint, {amount: -10, bevelEnabled: false});
+    var mesh = new THREE.Mesh(geometry, buildingMaterial ); //  new THREE.MeshBasicMaterial({map: this.texture})
+    mesh.rotation.x = -Math.PI / 2; // 90 degree
+    mesh.rotateY(Math.PI);
+    mesh.rotateZ(Math.PI);
+    mesh.material.side = THREE.DoubleSide;
+    this.buildingGroup.add(mesh);
+
+  }
+
   destroy() {
 
-    if(this.isLoaded){
-      this.threeScene.remove(this.mesh);
-      this.mesh.geometry.dispose();
-      this.mesh.material.dispose();
-      if(DEBUGGING){
-        this.tileText.parentNode.removeChild(this.tileText);
-      }
+    if (this.isLoaded) {
+      this.threeScene.remove(this.buildingGroup);
+      this.buildingGroup.children.forEach( e =>{
+        e.geometry.dispose();
+        e.material.dispose();
+      });
+      this.buildingGroup = undefined;
+
+
     } else {
-      const waiting = setInterval( () => {
-        if(this.isLoaded){
-          this.threeScene.remove(this.mesh);
-          this.mesh.geometry.dispose();
-          this.mesh.material.dispose();
-          if(DEBUGGING){
-            this.tileText.parentNode.removeChild(this.tileText);
-          }
+      // TODO: try to aboard loading if tile is still in loading state
+      const waiting = setInterval(() => {
+        if (this.isLoaded) {
+          this.threeScene.remove(this.buildingGroup);
+          this.buildingGroup.children.forEach( e =>{
+            e.geometry.dispose();
+            e.material.dispose();
+          });
+          this.buildingGroup = undefined;
           clearTimeout(waiting);
         }
-      } , 200);
+      }, 200);
     }
-
   }
 
 }
@@ -130,7 +176,7 @@ https://stackoverflow.com/questions/50077508/three-js-indexed-buffergeometry-vs-
 
 Three.js indexed BufferGeometry
 
- for many different geometries, better rthan standard geometry type
+ for many different geometries, better than standard geometry type
 
 
 InstancedBufferGeometry
@@ -141,41 +187,8 @@ or many trees in a scene with the same shape
 
 https://codepen.io/usefulthink/pen/YNrvpY?editors=0010
 
-
-
-
-
-
-
  */
 
-/*
 
-var pointSouthWest = [center.lat - 0.003 , center.lng - 0.0045];
-		var pointNorthWest = [center.lat + 0.003 , center.lng - 0.0045];
-		var pointNorthEast = [center.lat + 0.003 , center.lng + 0.0045];
-		var pointSouthEast = [center.lat - 0.003 , center.lng + 0.0045];
-
-		queryBox = [pointSouthWest, pointNorthEast ];
-
-		var query = '(node["level"](' + queryBox + '); way["level"](' + queryBox
-            + '); relation["level"](' + queryBox + '); >>->.rels;>; ); out body; >; out skel qt;'
-
-            	var endpoint = "https://overpass-api.de/api/interpreter?data="
-		queryOverpass = $.get(endpoint + query, working);
-
-
-
-(
-  node( 52.545737855911085, 13.354670405387878, 52.54665453925685,13.357154130935669);
-  way(52.545737855911085, 13.354670405387878, 52.54665453925685,13.357154130935669);
-  relation(52.545737855911085, 13.354670405387878, 52.54665453925685,13.357154130935669);
-);
-out body;  >;
-out skel qt;
-
-
-
- */
 
 

@@ -15,6 +15,8 @@ class MovementWatcher {
     this.changeTilesStack();
     this.invokeTileLoading();
 
+  //   TODO: make area covered for maptiles bigger than for datatiles
+
   }
 
   invokeTileLoading() {
@@ -23,9 +25,10 @@ class MovementWatcher {
     if (this.joiningTilesBlocked) return;
 
     this.joiningTiles.forEach(e => {
-      e.calculateDistanceToOrigin(this.newCameraPos);
-      if (e.distanceToOrigin < LOADING_TILE_DISTANCE && !e.isLoading) {
-        e.create();
+      e[0].calculateDistanceToOrigin(this.newCameraPos);
+      if (e[0].distanceToOrigin < LOADING_TILE_DISTANCE && !e[0].isLoading) {
+        e[0].create();
+        e[1].create();
       }
 
     });
@@ -79,10 +82,11 @@ class MovementWatcher {
 
     let neededTile = false;
     let i, j;
-    let oldElement, newElement;
+    let oldElement, oldElement2, newElement;
     // decision which tiles will be needed after the camera move from one tile to another
     for (i = 0; i < this.joiningTiles.length; i++) {
-      oldElement = this.joiningTiles[i];
+      oldElement = this.joiningTiles[i][0];
+      oldElement2 = this.joiningTiles[i][1];
 
       for (j = 0; j < this.tileStack.length; j++) {
         newElement = this.tileStack[j];
@@ -100,6 +104,7 @@ class MovementWatcher {
       if (!neededTile) {
         this.joiningTiles.splice(i, 1);
         oldElement.destroy();
+        oldElement2.destroy();
         i--;
       }
       neededTile = false;
@@ -108,7 +113,7 @@ class MovementWatcher {
     // the new needed tile numbers become proper tiles and get pushed to the old tile stack. Tiles get loaded later.
     // Only from this point there are available for distance calculation and therefore check if get loaded(visualized) or not
     this.tileStack.forEach(e => {
-      this.joiningTiles.push(new BaseTile(this.origin, e))
+      this.joiningTiles.push([new BaseTile(this.origin, e), new DataTile(this.origin, e)]);
     });
 
     this.joiningTilesBlocked = false;
