@@ -17,31 +17,32 @@ class DataTile extends Tile {
     this.loadData()
       .then(res => this.processData(res))
       .catch(e => {
-        if(e === 429){
+        if (e === 429) {
           console.log(e);
-          setTimeout(() => this.loadData(),1000);
-        } });
+          setTimeout(() => this.loadData(), 1000);
+        }
+      });
 
   }
 
   processData(res) {
 
-    const buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5 }); //  0xcac8d2
-    const buildingHeight = 4;
+    const buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5}); //  0xcac8d2
     const origin = this.origin.wgs2Mercator();
     const data = osmtogeojson(res);
 
     data.features.forEach(feature => {
 
       if (feature.geometry.type === 'Polygon' && feature.properties.tags.hasOwnProperty('building')) {
-        this.creatureBuilding(feature, buildingHeight, buildingMaterial, origin);
+        this.creatureBuilding(feature, buildingMaterial, origin);
       } else if (false) {
 
       }
 
     });
 
-    this.threeScene.add(this.buildingGroup);
+    map.get().dataTiles.add(this.buildingGroup)
+
     this.isLoaded = true;
 
   }
@@ -58,7 +59,7 @@ class DataTile extends Tile {
       const httpRequest = new XMLHttpRequest();
 
       // random numer between 1 and 4
-      const randomNum = Math.floor((Math.random() * 4) + 1)-1;
+      const randomNum = Math.floor((Math.random() * 4) + 1) - 1;
 
       const urls = [
         'https://overpass-api.de/api/interpreter?data=',
@@ -91,7 +92,7 @@ class DataTile extends Tile {
       httpRequest.onreadystatechange = (ev) => {
 
         if (httpRequest.readyState === XMLHttpRequest.DONE) {
-          if (httpRequest.readyState==4  && httpRequest.status === 200) {
+          if (httpRequest.readyState == 4 && httpRequest.status === 200) {
             // data has arrived
             resolve(JSON.parse(httpRequest.responseText));
 
@@ -110,27 +111,42 @@ class DataTile extends Tile {
 
   }
 
-  creatureBuilding(feature, buildingHeight, buildingMaterial, origin) {
+  creatureBuilding(feature, buildingMaterial, origin) {
+
+    // console.log(feature)
+    // TODO: solve this problem in a better way, height of building is very uneven compared to reality
+    let buildingHeight = 4;
+    const tags = feature.properties.tags;
+    if (tags.hasOwnProperty('height')) {
+      buildingHeight = tags['height'];
+    } else if (tags.hasOwnProperty('building:levels')) {
+      buildingHeight = tags['building:levels'] * 2;
+    } else if (tags.hasOwnProperty('levels')) {
+      buildingHeight = tags['levels'] * 2;
+    }
 
     let buildingFootprint, oRingElement = [];
     const coordinates = feature.geometry.coordinates;
     coordinates.forEach((ring, index) => {
       if (index === 0) {
         oRingElement = ring.map(x => {
-          return new THREE.Vector2(-1 * (origin[0] - util.wgs2MercX(x[0])), origin[1] - util.wgs2MercY(x[1]))
+          return new THREE.Vector2(-1 * map.get().scaleFactor * (origin[0] - util.wgs2MercX(x[0])), (origin[1] - util.wgs2MercY(x[1])) * map.get().scaleFactor)
         });
         buildingFootprint = new THREE.Shape(oRingElement);
       } else {
         // these all are the inner rings of the polygon and therefore holes
         buildingFootprint.holes.push(new THREE.Path(ring.map(x => {
-          return new THREE.Vector2(-1 * (origin[0] - util.wgs2MercX(x[0])), origin[1] - util.wgs2MercY(x[1]))
+          return new THREE.Vector2(-1 * map.get().scaleFactor * (origin[0] - util.wgs2MercX(x[0])), (origin[1] - util.wgs2MercY(x[1])) * map.get().scaleFactor)
         })));
 
       }
     });
 
-    var geometry = new THREE.ExtrudeGeometry(buildingFootprint, {amount: -10, bevelEnabled: false});
-    var mesh = new THREE.Mesh(geometry, buildingMaterial ); //  new THREE.MeshBasicMaterial({map: this.texture})
+    var geometry = new THREE.ExtrudeGeometry(buildingFootprint, {
+      amount: buildingHeight * -1 * map.get().scaleFactor,
+      bevelEnabled: false
+    });
+    var mesh = new THREE.Mesh(geometry, buildingMaterial); //  new THREE.MeshBasicMaterial({map: this.texture})
     mesh.rotation.x = -Math.PI / 2; // 90 degree
     mesh.rotateY(Math.PI);
     mesh.rotateZ(Math.PI);
@@ -141,29 +157,19 @@ class DataTile extends Tile {
 
   destroy() {
 
-    if (this.isLoaded) {
-      this.threeScene.remove(this.buildingGroup);
-      this.buildingGroup.children.forEach( e =>{
-        e.geometry.dispose();
-        e.material.dispose();
-      });
-      this.buildingGroup = undefined;
+    // TODO: try to aboard loading if tile is still in loading state
+    const waiting = setInterval(() => {
+      if (this.isLoaded) {
+        map.get().dataTiles.remove(this.buildingGroup);
+        this.buildingGroup.children.forEach(e => {
+          e.geometry.dispose();
+          e.material.dispose();
+        });
+        this.buildingGroup = undefined;
+        clearTimeout(waiting);
+      }
+    }, 200);
 
-
-    } else {
-      // TODO: try to aboard loading if tile is still in loading state
-      const waiting = setInterval(() => {
-        if (this.isLoaded) {
-          this.threeScene.remove(this.buildingGroup);
-          this.buildingGroup.children.forEach( e =>{
-            e.geometry.dispose();
-            e.material.dispose();
-          });
-          this.buildingGroup = undefined;
-          clearTimeout(waiting);
-        }
-      }, 200);
-    }
   }
 
 }

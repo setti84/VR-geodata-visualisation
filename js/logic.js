@@ -1,19 +1,21 @@
 
+let map;
+
+const init = () => {
 
 // new LatLng( 52.54591075494661, 13.355914950370789, 18 );   //Berlin beuth
 // new LatLng(40.72372, -73.98922);   // New York
 // new LatLng(1.29422,103.85411);        // Singapore
 // new LatLng(0,0);
 
-const map = new MapApp({
-  zoom: 19,
-  position:  {lat: 52.54591075494661, lng: 13.355914950370789}, // {lat: 1.29422, lng: 103.85411}
-  debugging: false,
-  maptiles: 'mapbox',
-});
+  map = new MapApp({
+    zoom: 19,
+    position: {lat: 52.54591075494661, lng: 13.3559149503707}, //  {lat:40.714126602154664, lng: -74.0062665939331}
+    debugging: false,
+    maptiles: 'mapbox',
+  });
 
-console.log(window);
-
+  console.log(window);
 
   const handHTML = document.querySelector("#right-hand");
 
@@ -23,7 +25,13 @@ console.log(window);
   });
 
 
-function changeCoordinatesDisplay(cam) {
+}
+
+document.addEventListener("DOMContentLoaded", init);
+
+
+
+const changeCoordinatesDisplay = (cam) => {
 
   document.getElementById('text').innerText = "Cam Pos Origin in WGS: " + cam.originlatLon + "\n "
     + "Cam Pos Origin in Mercator: " + cam.originMercator + "\n "
@@ -38,16 +46,18 @@ function changeCoordinatesDisplay(cam) {
 
 
 
-
+//
 // setTimeout( () => {
 //
 //   const allObjects = document.querySelector('a-scene').object3D.children;
-//   // console.log(allObjects)
 //
 //   allObjects.forEach( e => {
-//     // console.log("resize")
-//     // e.scale.set(SCALEFACTOR,SCALEFACTOR , SCALEFACTOR);
-//   })
+//     if(e.type === 'Group' ) {
+//       if(e.name === 'buildings' || e.name === 'basemap') {
+//         e.position.set(e.position.x*SCALEFACTOR,e.position.y*SCALEFACTOR , e.position.z*SCALEFACTOR);
+//         e.scale.set(e.scale.x*SCALEFACTOR,  e.scale.y, e.scale.z*SCALEFACTOR ,);
+//       }
+//     }
+//   });
 //
-//
-// },2000);
+// },4000);

@@ -8,3 +8,12 @@
     color: white;
     padding: 10px;
 }
+
+#slider-box {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: linen;
+  border-radius: 5px;
+  z-index: 1;
+}

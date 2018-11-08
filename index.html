@@ -15,6 +15,7 @@
 
     <script src="./js/constants.js"></script>
     <script src="./js/util.js"></script>
+    <script src="js/workerpool.js"></script>
 
     <script src="./js/events.js"></script>
     <script src="./js/textureManager.js"></script>
@@ -35,10 +36,17 @@
 
 <body class="a-body" >
 
+    <div id="slider-box">
+        <input type="range" min="1" max="400" value="0" step="5" id="scale-slider" orient="vertical" >
+
+
+
+    </div>
+
     <div id="text"> </div>
 
 
-<a-scene stats antialias="true" background="color: #ECECEC" fog="type: exponential; near:5 density:100.1125 color: #AAA" > <!-- fog="type: exponential; near:5 density:100.1125 color: #AAA" -->
+<a-scene stats antialias="true" background="color: #ECECEC" > <!-- fog="type: exponential; near:5 density:100.1125 color: #AAA" -->
 
     <a-assets>
         <img id="sky" src="./data/background.png">
