@@ -16,12 +16,12 @@ class BaseTile extends Tile {
     this.isLoading = true;
     const x = this.tileCoords[0];
     const y = (Math.pow(2, this.origin.zoom) - 1) - this.tileCoords[1];
-    let size = (this.bounds[1] - this.bounds[0]) * map.get().scaleFactor;
-    const pos = [(this.origin.wgs2Mercator()[0] - this.tileMiddle[0]) * map.get().scaleFactor, (this.origin.wgs2Mercator()[1] - this.tileMiddle[1]) * map.get().scaleFactor];
+    let size = (this.bounds[1] - this.bounds[0]) * SCALEFACTOR;
+    const pos = [(this.origin.wgs2Mercator()[0] - this.tileMiddle[0]) * SCALEFACTOR, (this.origin.wgs2Mercator()[1] - this.tileMiddle[1]) * SCALEFACTOR];
 
     if (DEBUGGING) {
       this.showTileNumber(pos, x, y);
-      size = Math.floor(this.bounds[1] - this.bounds[0]) * map.get().scaleFactor; // recognise tile gaps
+      size = Math.floor(this.bounds[1] - this.bounds[0]) * SCALEFACTOR; // recognise tile gaps
     }
 
 

@@ -17,7 +17,8 @@ class DataTile extends Tile {
     this.loadData()
       .then(res => this.processData(res))
       .catch(e => {
-        if (e === 429) {
+        if (e === 429 || e === 503) {
+          // TODO: do something with 503.
           console.log(e);
           setTimeout(() => this.loadData(), 1000);
         }
@@ -130,20 +131,20 @@ class DataTile extends Tile {
     coordinates.forEach((ring, index) => {
       if (index === 0) {
         oRingElement = ring.map(x => {
-          return new THREE.Vector2(-1 * map.get().scaleFactor * (origin[0] - util.wgs2MercX(x[0])), (origin[1] - util.wgs2MercY(x[1])) * map.get().scaleFactor)
+          return new THREE.Vector2(-1 * SCALEFACTOR * (origin[0] - util.wgs2MercX(x[0])), (origin[1] - util.wgs2MercY(x[1])) * SCALEFACTOR)
         });
         buildingFootprint = new THREE.Shape(oRingElement);
       } else {
         // these all are the inner rings of the polygon and therefore holes
         buildingFootprint.holes.push(new THREE.Path(ring.map(x => {
-          return new THREE.Vector2(-1 * map.get().scaleFactor * (origin[0] - util.wgs2MercX(x[0])), (origin[1] - util.wgs2MercY(x[1])) * map.get().scaleFactor)
+          return new THREE.Vector2(-1 * SCALEFACTOR * (origin[0] - util.wgs2MercX(x[0])), (origin[1] - util.wgs2MercY(x[1])) * SCALEFACTOR)
         })));
 
       }
     });
 
     var geometry = new THREE.ExtrudeGeometry(buildingFootprint, {
-      amount: buildingHeight * -1 * map.get().scaleFactor,
+      amount: buildingHeight * -1 * SCALEFACTOR,
       bevelEnabled: false
     });
     var mesh = new THREE.Mesh(geometry, buildingMaterial); //  new THREE.MeshBasicMaterial({map: this.texture})
