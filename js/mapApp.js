@@ -10,7 +10,7 @@ class MapApp {
     this.events = new Events();
     this.textureManager = new TextureManager();
     this.camera = document.querySelector('#camera').object3D;
-    console.log(this.camera)
+    this.events = new Events();
 
     const dataTiles = this.dataTiles = new THREE.Group();
     dataTiles.name = 'buildings';
@@ -35,6 +35,32 @@ class MapApp {
     //   this.position = new LatLng( startPos[startPos.length-1], startPos[startPos.length-2], this.zoom );
     //   console.log(this.position)
     // }
+
+  }
+
+  addEvents() {
+    // this.user = new User();
+
+    document.body.addEventListener("wheel", (e) => {
+      this.events.emit('MOUSEWHEEL_CHANGE', e.deltaY);
+    });
+
+    this.events.on('MOUSEWHEEL_CHANGE', change => {
+      let posY = util.clamp(parseInt(this.camera.position.y)+change, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT);
+      this.camera.position.set(this.camera.position.x, posY, this.camera.position.z);
+    });
+
+    document.body.addEventListener("mousemove", (e) => {
+      this.events.emit('MOUSE_POSITION_CHANGE', e);
+    });
+
+    this.events.on('MOUSE_POSITION_CHANGE', change => {
+      if(change.buttons !== 1) return;
+      console.log('mousemovement')
+    });
+
+
+
 
   }
 

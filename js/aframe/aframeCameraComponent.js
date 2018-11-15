@@ -17,10 +17,7 @@ AFRAME.registerComponent('camerascanner', {
 
     this.el.addEventListener('componentchanged', () => {
 
-      // console.log(this.newPos)
-
       this.newPos = this.el.object3D.getWorldPosition().multiply(camScaleVec);
-      console.log(this.el.object3D.getWorldPosition())
       // posDelta.set((this.newPos.x-this.oldPos.x), 0, (this.newPos.z-this.oldPos.z)*-1);
       posDelta.set(this.newPos.x-this.oldPos.x, 0, this.newPos.z-this.oldPos.z);
       this.cam.setPosition(posDelta);
@@ -28,7 +25,6 @@ AFRAME.registerComponent('camerascanner', {
       this.cam.getMovementWatcher().search();
       changeCoordinatesDisplay(this.cam);
       this.oldPos = this.el.object3D.getWorldPosition().multiply(camScaleVec);
-      console.log(this.el.object3D.getWorldPosition())
 
     });
   },

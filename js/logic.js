@@ -15,6 +15,8 @@ const init = () => {
     maptiles: 'mapbox',
   });
 
+  map.addEvents();
+
   console.log(window);
 
   const handHTML = document.querySelector("#right-hand");
