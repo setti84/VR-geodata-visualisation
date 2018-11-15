@@ -38,11 +38,10 @@
 
 <body class="a-body">
 
-    <div id="slider-box">
-        <input type="range" min="1" max="400" value="0" step="5" id="scale-slider" orient="vertical" >
-
-
-
+    <div class="mapzom-button">
+        <input class="mapzom-button-plus-minus" id="mapzoom-plus" type="button" value="+" />
+        <br>
+        <input class="mapzom-button-plus-minus" id="mapzoom-minus" type="button" value="-" />
     </div>
 
     <div id="text"> </div>
@@ -77,34 +76,20 @@
 
     <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" ></a-box>
     <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" ></a-sphere>
-    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" ></a-cylinder>
+    <a-cylinder id="zylinder" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" ></a-cylinder>
 
     <!--
     <a-entity id="camera" camera="active: true" look-controls wasd-controls rotation="-180 180 0" position="0 1.6 0" data-aframe-default-camera cameralistener>
     -->
 
+    <!--
     <a-entity id="cameraRig" cameraRig: #cameraRig; cameralistener   >
+    -->
 
-        <a-entity id="camera" camera wasd-controls look-controls camerascanner rotation="-180 180 0" >
+        <a-entity id="camera" camera wasd-controls  camerascanner rotation="0 0 0" > <!--  look-controls   rotation="180 -180 0"  -->
             <a-light type="point" color="white" position="0 5 0"></a-light>
 
         </a-entity>
-
-
-        <a-entity id="right-hand" teleport-controls=""
-                  vive-controls="hand: right"
-                  microsoft-motion-controls="hand: right"
-                  oculus-touch-controls="hand: right"
-                  daydream-controls="right"
-                  gearvr-controls="right">
-        </a-entity>
-
-        <!-- cameraRig: #cameraRig; teleportOrigin: #head;  collisionEntities: #town; -->
-    </a-entity>
-
-
-
-    </a-entity>
 
 </a-scene>
 

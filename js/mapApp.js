@@ -9,7 +9,7 @@ class MapApp {
     const scene = this.threeScene = document.querySelector('a-scene').object3D;
     this.events = new Events();
     this.textureManager = new TextureManager();
-    this.camera = document.querySelector('#camera').object3D;
+    this.camera = document.querySelector(CAMERA_DIV).object3D;
     this.events = new Events();
 
     const dataTiles = this.dataTiles = new THREE.Group();
@@ -20,9 +20,9 @@ class MapApp {
     basetiles.name = 'basemap';
     scene.add(basetiles);
 
-    this.scaleFactor = 1;
-    this.scale = document.getElementById("scale-slider");
-    this.initScale();
+    // this.scaleFactor = 1;
+    // this.scale = document.getElementById("scale-slider");
+    // this.initScale();
 
     // TODO: array(or map object?) with mother object for tiles? like plane geometry, building geometry, everything we need more than once for tiles?
     // TODO: Scaling: buildings should be closer together, maptiles needs to be improved
@@ -42,25 +42,69 @@ class MapApp {
     // this.user = new User();
 
     document.body.addEventListener("wheel", (e) => {
-      this.events.emit('MOUSEWHEEL_CHANGE', e.deltaY);
+      this.events.emit('MAP_HEIGHT_CHANGE', e.deltaY);
     });
 
-    this.events.on('MOUSEWHEEL_CHANGE', change => {
-      let posY = util.clamp(parseInt(this.camera.position.y)+change, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT);
-      this.camera.position.set(this.camera.position.x, posY, this.camera.position.z);
+    document.getElementById('mapzoom-plus').addEventListener("click", () => this.events.emit('MAP_HEIGHT_CHANGE', 3));
+    document.getElementById('mapzoom-minus').addEventListener("click", () => this.events.emit('MAP_HEIGHT_CHANGE', -3));
+
+    this.events.on('MAP_HEIGHT_CHANGE', change => {
+
+      let posY = this.camera.position.y;
+      let newPosY = util.clamp(parseInt(this.camera.position.y)+change, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT);
+
+      // turns the camera down to streetlevel between 90 and 1 meter height
+      (posY <= 90 && posY > 1) ? this.camera.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), -1 * change * Math.PI / 180):false;
+
+      this.camera.position.set(this.camera.position.x, newPosY, this.camera.position.z);
+
+    });
+
+    // document.body.addEventListener("click", (e) => {
+    //   e.stopPropagation();
+    //   e.preventDefault();
+    //
+    // });
+    //
+    // document.body.addEventListener("mousedown", (e) => {
+    //   e.stopPropagation();
+    //   e.preventDefault();
+    //
+    // });
+
+
+    // Prevent to open context menu on right click
+    document.body.addEventListener("contextmenu", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+
     });
 
     document.body.addEventListener("mousemove", (e) => {
+      e.stopPropagation();
+      e.preventDefault()
       this.events.emit('MOUSE_POSITION_CHANGE', e);
     });
 
     this.events.on('MOUSE_POSITION_CHANGE', change => {
-      if(change.buttons !== 1) return;
-      console.log('mousemovement')
+      // left button
+      if(change.buttons === 1){
+        this.events.emit('MAP_POSITION_CHANGE', change);
+
+        // right button
+      } else if(change.buttons === 2){
+        this.events.emit('MAP_ROTATION_CHANGE', change);
+      }
+
     });
 
+    this.events.on('MAP_POSITION_CHANGE', change => {
+      // console.log('mousemovement button 1', change)
+    });
 
-
+    this.events.on('MAP_ROTATION_CHANGE', change => {
+      // console.log('mousemovement button 2', change)
+    });
 
   }
 
@@ -68,21 +112,31 @@ class MapApp {
     return this;
   }
 
-  initScale() {
-    let target;
-    this.scale.addEventListener('input', (e) => {
-      target = (e.target) ? e.target : e.srcElement;
-      this.scaleFactor = target.value;
-      // this.changeScale();
-      this.camera.position.set(this.camera.position.x, 0+parseInt(this.scaleFactor), this.camera.position.z);
-      // calculation: (max-1)*Math.pow(val, strength) + min;
-      // temp = (4-1)*Math.pow(target.value, 2.5);
-      // // set minimum value to 0.00003
-      // temp = temp < 0.07 ? 0.07 : temp;
-
-    })
-
-  }
+  // initScale() {
+  //
+  //
+  //
+  //   let target;
+  //   this.scale.addEventListener('input', (e) => {
+  //
+  //     target = (e.target) ? e.target : e.srcElement;
+  //
+  //     // this.events.emit('MAP_HEIGHT_CHANGE', e.deltaY);
+  //
+  //
+  //     console.log(0+parseInt(this.scaleFactor))
+  //
+  //     this.scaleFactor = target.value;
+  //     // this.changeScale();
+  //     this.camera.position.set(this.camera.position.x, 0+parseInt(this.scaleFactor), this.camera.position.z);
+  //     // calculation: (max-1)*Math.pow(val, strength) + min;
+  //     // temp = (4-1)*Math.pow(target.value, 2.5);
+  //     // // set minimum value to 0.00003
+  //     // temp = temp < 0.07 ? 0.07 : temp;
+  //
+  //   })
+  //
+  // }
 
   // changeScale() {
   //
@@ -108,6 +162,18 @@ class MapApp {
 
 
 }
+
+
+// document.querySelector('#cameraRig').object3D.rotateX( -1 * change * Math.PI / 180); // 1*posY/180*Math.PI
+// document.querySelector('#zylinder').object3D.rotateOnAxis(new THREE.Vector3(1,0,0), -1 * change * Math.PI / 180);
+//   document.querySelector('#zylinder').object3D.rotateX( -1 * change * Math.PI / 180); // 1*posY/180*Math.PI
+// document.querySelector('#cameraRig').object3D.rotateX(-1*posY/180*Math.PI);
+// document.querySelector('#camera').object3D.position.set(this.camera.position.x, posY, this.camera.position.z);
+// console.log(posY, -1*posY/180*Math.PI)
+// console.log(document.querySelector('#cameraRig').object3D.rotation, this.camera.position)
+// console.log(document.querySelector('#cameraRig').object3D.rotation._x, -1*posY * Math.PI/180)
+// console.log(-1*posY * Math.PI/180 + Math.abs(document.querySelector('#cameraRig').object3D.rotation._x));
+
 
 
 /*

@@ -18,13 +18,14 @@ const init = () => {
   map.addEvents();
 
   console.log(window);
+  console.log(navigator)
 
-  const handHTML = document.querySelector("#right-hand");
-
-  handHTML.setAttribute('teleport-controls', {
-    cameraRig: '#cameraRig',
-    teleportOrigin: '#head',
-  });
+  // const handHTML = document.querySelector("#right-hand");
+  //
+  // handHTML.setAttribute('teleport-controls', {
+  //   cameraRig: '#cameraRig',
+  //   teleportOrigin: '#head',
+  // });
 
 
 }

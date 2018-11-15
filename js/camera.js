@@ -8,15 +8,14 @@ class Camera {
     this.originMercator = this.originlatLon.wgs2Mercator();
     this.newLatLng = new LatLng(latLng.lat, latLng.lng, latLng.zoom);
     this.movementWatcher = new MovementWatcher(this.originlatLon, this.newLatLng);
-    const camDom = document.querySelector('#camera');
-    this.threeScene = document.querySelector('a-scene').object3D;
-    console.log(camDom)
+    const threeCam = this.threeCamera = document.querySelector('#camera').object3D;
 
-    camDom.setAttribute('wasd-controls', { acceleration: MOVINGFACTOR });
-    camDom.object3D.position.set(camDom.object3D.position.x, CAMERAHEIGHT, camDom.object3D.position.z);
-    // console.log(camDom.object3D.position)
+    document.querySelector('#camera').setAttribute('wasd-controls', { acceleration: MOVINGFACTOR });
+    threeCam.position.set(threeCam.position.x, CAMERAHEIGHT, threeCam.position.z);
+    threeCam.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), -90 * Math.PI / 180);
 
   }
+
 
   getMovementWatcher(){
     return this.movementWatcher;
