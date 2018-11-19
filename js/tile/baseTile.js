@@ -47,7 +47,7 @@ class BaseTile extends Tile {
 
       this.mesh.rotation.x = -Math.PI / 2; // 90 degree
       this.mesh.position.set(-1 * pos[0], 0, pos[1]);
-      map.get().baseTiles.add(this.mesh)
+      map.get().mapTiles.add(this.mesh)
       // this.threeScene.add(this.mesh);
       this.isLoaded = true;
 
@@ -98,7 +98,7 @@ class BaseTile extends Tile {
     const waiting = setInterval(() => {
 
       if (this.isLoaded) {
-        map.get().baseTiles.remove(this.mesh);
+        map.get().mapTiles.remove(this.mesh);
         this.texture.dispose();
         this.mesh.material.dispose();
         this.mesh.geometry.dispose();

@@ -18,6 +18,18 @@ const util = function(){
     return y * ORIGINSHIFT / 180;
   }
 
+  const showMatrix = (matrix) => {
+    // console.log('---Anfang------')
+  // console.log(JSON.stringify(matrix.elements))
+    console.log(Math.round(matrix.elements[0] * 100)/100, Math.round(matrix.elements[1] * 100)/100, Math.round(matrix.elements[2] * 100)/100, Math.round(matrix.elements[3] * 100)/100, '\n',
+      Math.round(matrix.elements[4] * 100)/100, Math.round(matrix.elements[5] * 100)/100, Math.round(matrix.elements[6] * 100)/100, Math.round(matrix.elements[7] * 100)/100, '\n',
+      Math.round(matrix.elements[8] * 100)/100, Math.round(matrix.elements[9] * 100)/100, Math.round(matrix.elements[10] * 100)/100, Math.round(matrix.elements[11] * 100)/100, '\n',
+      Math.round(matrix.elements[12] * 100)/100, Math.round(matrix.elements[13] * 100)/100, Math.round(matrix.elements[14] * 100)/100, Math.round(matrix.elements[15] * 100)/100
+    )
+    // console.log('----Ende-----')
+
+  }
+
   const clamp = (num, min, max) => {
     return Math.min(Math.max(min, num), max);
   };
@@ -25,7 +37,8 @@ const util = function(){
   return{
     wgs2MercX: wgs2MercX,
     wgs2MercY: wgs2MercY,
-    clamp : clamp
+    clamp : clamp,
+    showMatrix: showMatrix
   }
 
 }();

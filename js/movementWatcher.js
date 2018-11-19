@@ -2,7 +2,7 @@ class MovementWatcher {
 
   // Tile loading logic
 
-  constructor(origin, newCameraPos) {
+  constructor(origin, newCameraPos, tilesources) {
 
     this.newCameraPos = newCameraPos;
     this.origin = origin;
@@ -10,7 +10,7 @@ class MovementWatcher {
     this.joiningTilesBlocked = false;
     this.oldTile = newCameraPos.googleTiles();
     this.tileIncrement = Math.floor(CALCULATE_TILE_DISTANCE / 2);
-    this.tileStack = []
+    this.tileStack = [];
 
     this.changeTilesStack();
     this.invokeTileLoading();

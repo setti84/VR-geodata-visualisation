@@ -9,16 +9,13 @@ class MapApp {
     const scene = this.threeScene = document.querySelector('a-scene').object3D;
     this.events = new Events();
     this.textureManager = new TextureManager();
+    // TODO: change naming
+    this.cam = new Camera(this.position)
     this.camera = document.querySelector(CAMERA_DIV).object3D;
     this.events = new Events();
 
-    const dataTiles = this.dataTiles = new THREE.Group();
-    dataTiles.name = 'buildings';
-    scene.add(dataTiles);
-
-    const basetiles = this.baseTiles = new THREE.Group();
-    basetiles.name = 'basemap';
-    scene.add(basetiles);
+    var axesHelper = new THREE.AxesHelper( 50 );
+    scene.add( axesHelper );
 
     // this.scaleFactor = 1;
     // this.scale = document.getElementById("scale-slider");
@@ -38,25 +35,90 @@ class MapApp {
 
   }
 
+  addTiles(options = {}){
+
+    this.mapTiles = new THREE.Group();
+    this.mapTiles.name = options.mapTiles || 'mapbox';
+    this.threeScene.add(this.mapTiles);
+
+    if(options.dataTiles){
+      this.dataTiles = new THREE.Group();
+      this.dataTiles.name = options.dataTiles || 'buildings';
+      this.threeScene.add(this.dataTiles);
+
+    }
+
+    this.cam.addMovementWatcher();
+
+  }
+
   addEvents() {
-    // this.user = new User();
+
+    // Prevent to open context menu on right click
+    document.body.addEventListener("contextmenu", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+    });
 
     document.body.addEventListener("wheel", (e) => {
       this.events.emit('MAP_HEIGHT_CHANGE', e.deltaY);
     });
 
-    document.getElementById('mapzoom-plus').addEventListener("click", () => this.events.emit('MAP_HEIGHT_CHANGE', 3));
-    document.getElementById('mapzoom-minus').addEventListener("click", () => this.events.emit('MAP_HEIGHT_CHANGE', -3));
+    document.body.addEventListener("mousemove", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.events.emit('MOUSE_POSITION_CHANGE', e);
+    });
+
+    document.getElementById('mapzoom-plus').addEventListener("click", () => this.events.emit('MAP_HEIGHT_CHANGE', -3));
+    document.getElementById('mapzoom-minus').addEventListener("click", () => this.events.emit('MAP_HEIGHT_CHANGE', 3));
 
     this.events.on('MAP_HEIGHT_CHANGE', change => {
 
-      let posY = this.camera.position.y;
+      let posY = this.cam.getPosition().y;
       let newPosY = util.clamp(parseInt(this.camera.position.y)+change, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT);
 
-      // turns the camera down to streetlevel between 90 and 1 meter height
-      (posY <= 90 && posY > 1) ? this.camera.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), -1 * change * Math.PI / 180):false;
+      // (posY <= 90 && posY > 1) ? this.cam.setRotationX(change):false;
+      this.cam.setHeight(newPosY);
 
-      this.camera.position.set(this.camera.position.x, newPosY, this.camera.position.z);
+    });
+
+    this.events.on('MOUSE_POSITION_CHANGE', e => {
+
+      // left button
+      if(e.buttons === 1){
+        this.events.emit('MAP_POSITION_CHANGE', e);
+
+        // right button
+      } else if(e.buttons === 2){
+        this.events.emit('MAP_ROTATION_CHANGE', e);
+      }
+
+    });
+
+    this.events.on('MAP_POSITION_CHANGE', e => {
+
+      // util.showMatrix(this.camera.matrixWorld);
+
+      // util.showMatrix(this.camera.modelViewMatrix);
+
+      // console.log(this.camera);
+
+      const pos = this.cam.getPosition();
+      this.cam.setPosition({x: pos.x+(e.movementX*MOVINGFACTOR_MOUSE*-1), y: pos.y, z: pos.z+(-1*e.movementY*MOVINGFACTOR_MOUSE)});
+
+    });
+
+    let oldAngle = 45;
+
+    this.events.on('MAP_ROTATION_CHANGE', change => {
+      // console.log('mousemovement button 2', change)
+      // this.cam.setRotationY(change.movementX);
+      let newAngle = util.clamp(oldAngle+(change.movementY/2),0.01,90)
+      //
+      oldAngle = newAngle;
+      this.cam.setRotationTest(newAngle)
+      // this.cam.setRotationTest(change.movementY)
 
     });
 
@@ -72,39 +134,6 @@ class MapApp {
     //
     // });
 
-
-    // Prevent to open context menu on right click
-    document.body.addEventListener("contextmenu", (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-
-    });
-
-    document.body.addEventListener("mousemove", (e) => {
-      e.stopPropagation();
-      e.preventDefault()
-      this.events.emit('MOUSE_POSITION_CHANGE', e);
-    });
-
-    this.events.on('MOUSE_POSITION_CHANGE', change => {
-      // left button
-      if(change.buttons === 1){
-        this.events.emit('MAP_POSITION_CHANGE', change);
-
-        // right button
-      } else if(change.buttons === 2){
-        this.events.emit('MAP_ROTATION_CHANGE', change);
-      }
-
-    });
-
-    this.events.on('MAP_POSITION_CHANGE', change => {
-      // console.log('mousemovement button 1', change)
-    });
-
-    this.events.on('MAP_ROTATION_CHANGE', change => {
-      // console.log('mousemovement button 2', change)
-    });
 
   }
 

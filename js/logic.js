@@ -12,10 +12,11 @@ const init = () => {
     zoom: 19,
     position: {lat: 52.54591075494661, lng: 13.3559149503707}, //  {lat:40.714126602154664, lng: -74.0062665939331}
     debugging: false,
-    maptiles: 'mapbox',
   });
 
   map.addEvents();
+
+  map.addTiles({mapTiles: 'mapbox', dataTiles: 'overpass'});
 
   console.log(window);
   console.log(navigator)
