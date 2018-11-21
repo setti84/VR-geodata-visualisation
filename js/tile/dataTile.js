@@ -51,64 +51,66 @@ class DataTile extends Tile {
 
   loadData() {
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {reject(false)});
 
-      const tilecoords = this.tileBounds();
-
-      const tileborder = LatLng.unprojectWorldCoordinates(tilecoords[0], tilecoords[2]).concat(LatLng.unprojectWorldCoordinates(tilecoords[1], tilecoords[3]));
-
-      const httpRequest = new XMLHttpRequest();
-
-      // random numer between 1 and 4
-      const randomNum = Math.floor((Math.random() * 4) + 1) - 1;
-
-      const urls = [
-        'https://overpass-api.de/api/interpreter?data=',
-        'https://lz4.overpass-api.de/api/interpreter?data=',
-        'https://overpass.openstreetmap.fr/api/interpreter?data=',
-        'https://overpass.kumi.systems/api/interpreter?data='
-      ];
-
-
-      const url = 'http://overpass-api.de/api/interpreter?data='; // 'https://data.sebastiansettgast.com/sprite.json';
-      // const url = 'http://overpass-api.de/api/interpreter?data=[out%3Ajson][timeout%3A25]%3B%28node[%22highway%22%3D%22bus_stop%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Brelation[%22landuse%22%3D%22residential%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Bway[%22landuse%22%3D%22retail%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Brelation[%22landuse%22%3D%22retail%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Bway[%22landuse%22%3D%22commercial%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Brelation[%22landuse%22%3D%22commercial%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Bnode[%22highway%22%3D%22bus_stop%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3B%29%3Bout%20body%3B%3E%3Bout%20skel%20qt%3B%0A';
-
-      const url2 = 'https://lz4.overpass-api.de/api/interpreter?data=';
-
-      const query = '[out:json];(' +
-        'node(' + tileborder + ')["building"];'
-        + 'way(' + tileborder + ')["building"];'
-        + 'relation(' + tileborder + ')["building"];'
-        + ');out body; >;out skel qt;';
-
-      // console.log(query)
-
-      httpRequest.open('GET', urls[randomNum] + query); //    'data/data.json'
-      httpRequest.send();
-
-      if (!httpRequest) {
-        reject("Cannot create an XMLHTTP instance");
-      }
-
-      httpRequest.onreadystatechange = (ev) => {
-
-        if (httpRequest.readyState === XMLHttpRequest.DONE) {
-          if (httpRequest.readyState == 4 && httpRequest.status === 200) {
-            // data has arrived
-            resolve(JSON.parse(httpRequest.responseText));
-
-          }
-          // else if(httpRequest.status === 429){
-          //   reject(httpRequest.status)
-          // }
-          else {
-            // no data arrived
-            // TODO: reload data? or destroy? Suggestions?
-            reject(httpRequest.status);
-          }
-        }
-      }
-    });
+    // return new Promise((resolve, reject) => {
+    //
+    //   const tilecoords = this.tileBounds();
+    //
+    //   const tileborder = LatLng.unprojectWorldCoordinates(tilecoords[0], tilecoords[2]).concat(LatLng.unprojectWorldCoordinates(tilecoords[1], tilecoords[3]));
+    //
+    //   const httpRequest = new XMLHttpRequest();
+    //
+    //   // random numer between 1 and 4
+    //   const randomNum = Math.floor((Math.random() * 4) + 1) - 1;
+    //
+    //   const urls = [
+    //     'https://overpass-api.de/api/interpreter?data=',
+    //     'https://lz4.overpass-api.de/api/interpreter?data=',
+    //     'https://overpass.openstreetmap.fr/api/interpreter?data=',
+    //     'https://overpass.kumi.systems/api/interpreter?data='
+    //   ];
+    //
+    //
+    //   const url = 'http://overpass-api.de/api/interpreter?data='; // 'https://data.sebastiansettgast.com/sprite.json';
+    //   // const url = 'http://overpass-api.de/api/interpreter?data=[out%3Ajson][timeout%3A25]%3B%28node[%22highway%22%3D%22bus_stop%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Brelation[%22landuse%22%3D%22residential%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Bway[%22landuse%22%3D%22retail%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Brelation[%22landuse%22%3D%22retail%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Bway[%22landuse%22%3D%22commercial%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Brelation[%22landuse%22%3D%22commercial%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3Bnode[%22highway%22%3D%22bus_stop%22]%2852.528127948407935%2C12.976956367492676%2C52.54572154464616%2C13.01549434661865%29%3B%29%3Bout%20body%3B%3E%3Bout%20skel%20qt%3B%0A';
+    //
+    //   const url2 = 'https://lz4.overpass-api.de/api/interpreter?data=';
+    //
+    //   const query = '[out:json];(' +
+    //     'node(' + tileborder + ')["building"];'
+    //     + 'way(' + tileborder + ')["building"];'
+    //     + 'relation(' + tileborder + ')["building"];'
+    //     + ');out body; >;out skel qt;';
+    //
+    //   // console.log(query)
+    //
+    //   httpRequest.open('GET', urls[randomNum] + query); //    'data/data.json'
+    //   httpRequest.send();
+    //
+    //   if (!httpRequest) {
+    //     reject("Cannot create an XMLHTTP instance");
+    //   }
+    //
+    //   httpRequest.onreadystatechange = (ev) => {
+    //
+    //     if (httpRequest.readyState === XMLHttpRequest.DONE) {
+    //       if (httpRequest.readyState == 4 && httpRequest.status === 200) {
+    //         // data has arrived
+    //         resolve(JSON.parse(httpRequest.responseText));
+    //
+    //       }
+    //       // else if(httpRequest.status === 429){
+    //       //   reject(httpRequest.status)
+    //       // }
+    //       else {
+    //         // no data arrived
+    //         // TODO: reload data? or destroy? Suggestions?
+    //         reject(httpRequest.status);
+    //       }
+    //     }
+    //   }
+    // });
 
   }
 
@@ -144,7 +146,7 @@ class DataTile extends Tile {
     });
 
     var geometry = new THREE.ExtrudeGeometry(buildingFootprint, {
-      amount: buildingHeight * -1 * SCALEFACTOR,
+      depth: buildingHeight * -1 * SCALEFACTOR,
       bevelEnabled: false
     });
     var mesh = new THREE.Mesh(geometry, buildingMaterial); //  new THREE.MeshBasicMaterial({map: this.texture})

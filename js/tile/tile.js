@@ -6,7 +6,10 @@ class Tile {
     this.isLoaded = false;
     this.isLoading = false;
     this.distanceToOrigin = 100; // random value set
-    this.threeScene = document.querySelector('a-scene').object3D;  // THREE.Scene
+    // this.threeScene = document.querySelector('a-scene').object3D;  // THREE.Scene
+    // console.log(map.get().threeScene);
+    this.threeScene = map.get().threeScene;
+
 
   }
 

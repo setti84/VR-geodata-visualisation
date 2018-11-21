@@ -1,7 +1,10 @@
-
 let map;
 
 const init = () => {
+
+  if ( WEBGL.isWebGLAvailable() === false ) {
+    document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+  }
 
 // new LatLng( 52.54591075494661, 13.355914950370789, 18 );   //Berlin beuth
 // new LatLng(40.72372, -73.98922);   // New York
@@ -11,43 +14,56 @@ const init = () => {
   map = new MapApp({
     zoom: 19,
     position: {lat: 52.54591075494661, lng: 13.3559149503707}, //  {lat:40.714126602154664, lng: -74.0062665939331}
-    debugging: false,
+    debugging: true,
   });
 
-  map.addEvents();
+  // map.addEvents();
 
   map.addTiles({mapTiles: 'mapbox', dataTiles: 'overpass'});
 
-  console.log(window);
-  console.log(navigator)
+  const animate = () => {
 
-  // const handHTML = document.querySelector("#right-hand");
-  //
-  // handHTML.setAttribute('teleport-controls', {
-  //   cameraRig: '#cameraRig',
-  //   teleportOrigin: '#head',
-  // });
+    map.get().threeRenderer.render(map.get().threeScene, map.get().threeCamera);
+    requestAnimationFrame(animate);
 
+  }
+
+  animate();
+
+  const addStats = () => {
+    javascript:(function () {
+      var script = document.createElement('script');
+      script.onload = function () {
+        var stats = new Stats();
+        document.body.appendChild(stats.dom);
+        requestAnimationFrame(function loop() {
+          stats.update();
+          requestAnimationFrame(loop)
+        });
+      };
+      script.src = '//mrdoob.github.io/stats.js/build/stats.min.js';
+      document.head.appendChild(script);
+    })()
+  }
+
+  addStats();
 
 }
 
 document.addEventListener("DOMContentLoaded", init);
 
 
-
 const changeCoordinatesDisplay = (cam) => {
 
   document.getElementById('text').innerText = "Cam Pos Origin in WGS: " + cam.originlatLon + "\n "
     + "Cam Pos Origin in Mercator: " + cam.originMercator + "\n "
-    + "Cam Pos Origin in Tile: " + cam.originlatLon.googleTiles()  + "\n "
+    + "Cam Pos Origin in Tile: " + cam.originlatLon.googleTiles() + "\n "
     + "------------------------------------------------------------------------------\n "
-    + "New Pos in WGS: " + cam.newLatLng  + "\n "
+    + "New Pos in WGS: " + cam.newLatLng + "\n "
     + "New Pos in Mercator: " + cam.newLatLng.wgs2Mercator() + "\n "
-    + "New Pos in Tile: " + cam.newLatLng.googleTiles()  + "\n ";
+    + "New Pos in Tile: " + cam.newLatLng.googleTiles() + "\n ";
 
 }
-
-
 
 
 //

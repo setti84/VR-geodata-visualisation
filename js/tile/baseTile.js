@@ -19,8 +19,8 @@ class BaseTile extends Tile {
     let size = (this.bounds[1] - this.bounds[0]) * SCALEFACTOR;
     const pos = [(this.origin.wgs2Mercator()[0] - this.tileMiddle[0]) * SCALEFACTOR, (this.origin.wgs2Mercator()[1] - this.tileMiddle[1]) * SCALEFACTOR];
 
-    if (DEBUGGING) {
-      this.showTileNumber(pos, x, y);
+    if (map.get().debugging) {
+      // this.showTileNumber(pos, x, y);  still in a frame mode
       size = Math.floor(this.bounds[1] - this.bounds[0]) * SCALEFACTOR; // recognise tile gaps
     }
 
@@ -104,7 +104,7 @@ class BaseTile extends Tile {
         this.mesh.geometry.dispose();
 
         if (DEBUGGING) {
-          this.tileText.parentNode.removeChild(this.tileText);
+          // this.tileText.parentNode.removeChild(this.tileText);
         }
         clearTimeout(waiting);
       }

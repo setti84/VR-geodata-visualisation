@@ -20,7 +20,7 @@ const util = function(){
 
   const showMatrix = (matrix) => {
     // console.log('---Anfang------')
-  // console.log(JSON.stringify(matrix.elements))
+
     console.log(Math.round(matrix.elements[0] * 100)/100, Math.round(matrix.elements[1] * 100)/100, Math.round(matrix.elements[2] * 100)/100, Math.round(matrix.elements[3] * 100)/100, '\n',
       Math.round(matrix.elements[4] * 100)/100, Math.round(matrix.elements[5] * 100)/100, Math.round(matrix.elements[6] * 100)/100, Math.round(matrix.elements[7] * 100)/100, '\n',
       Math.round(matrix.elements[8] * 100)/100, Math.round(matrix.elements[9] * 100)/100, Math.round(matrix.elements[10] * 100)/100, Math.round(matrix.elements[11] * 100)/100, '\n',
@@ -32,13 +32,26 @@ const util = function(){
 
   const clamp = (num, min, max) => {
     return Math.min(Math.max(min, num), max);
-  };
+  }
+
+
+  // const getCamLookingPos = (camera, newPos, startPos, direction, distance) => {
+  //
+  //   startPos.set(camera.position.x, camera.position.y, camera.position.z);
+  //   direction = direction.set(0,0,-1).applyEuler(camera.rotation, camera.rotation.order);
+  //   distance = clamp(camera.position.y, 0,1000);
+  //   newPos.addVectors ( startPos, direction.multiplyScalar( distance ) );
+  //
+  //   return newPos;
+  //
+  // }
 
   return{
     wgs2MercX: wgs2MercX,
     wgs2MercY: wgs2MercY,
     clamp : clamp,
-    showMatrix: showMatrix
+    showMatrix: showMatrix,
+    // getCamLookingPos: getCamLookingPos
   }
 
 }();

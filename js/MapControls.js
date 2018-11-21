@@ -17,14 +17,9 @@
 
 THREE.MapControls = function ( object, domElement ) {
 
-
-
 	this.object = object;
 
 	this.domElement = ( domElement !== undefined ) ? domElement : document;
-
-  console.log(this.object)
-  console.log(this.domElement)
 
 	// Set to false to disable this control
 	this.enabled = true;
@@ -44,6 +39,7 @@ THREE.MapControls = function ( object, domElement ) {
 	// Range is 0 to Math.PI radians.
 	this.minPolarAngle = 0; // radians
 	this.maxPolarAngle = Math.PI; // radians
+
 
 	// How far you can orbit horizontally, upper and lower limits.
 	// If set, must be a sub-interval of the interval [ - Math.PI, Math.PI ].
@@ -466,8 +462,6 @@ THREE.MapControls = function ( object, domElement ) {
 
 	function handleMouseDownPan( event ) {
 
-		//console.log( 'handleMouseDownPan' );
-
 		panStart.set( event.clientX, event.clientY );
 
 	}
@@ -477,8 +471,6 @@ THREE.MapControls = function ( object, domElement ) {
 		//console.log( 'handleMouseMoveRotate' );
 
 		rotateEnd.set( event.clientX, event.clientY );
-
-		console.log(event.clientX, event.clientY)
 
 		rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
 
@@ -561,6 +553,8 @@ THREE.MapControls = function ( object, domElement ) {
 	function handleKeyDown( event ) {
 
 		//console.log( 'handleKeyDown' );
+
+    map.get().cam.setPosition();
 
 		switch ( event.keyCode ) {
 
@@ -843,6 +837,8 @@ THREE.MapControls = function ( object, domElement ) {
 
 		event.preventDefault();
 
+		map.get().cam.setPosition();
+
 		switch ( state ) {
 
 			case STATE.ROTATE:
@@ -960,6 +956,8 @@ THREE.MapControls = function ( object, domElement ) {
 
 		event.preventDefault();
 		event.stopPropagation();
+
+    map.get().cam.setPosition();
 
 		switch ( event.touches.length ) {
 
