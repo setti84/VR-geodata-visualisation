@@ -127,6 +127,8 @@ THREE.MapControls = function ( object, domElement ) {
 	// this method is exposed, but perhaps it would be better if we can make it private...
 	this.update = function () {
 
+
+
 		var offset = new THREE.Vector3();
 
 		// so camera.up is the orbit axis
@@ -554,7 +556,9 @@ THREE.MapControls = function ( object, domElement ) {
 
 		//console.log( 'handleKeyDown' );
 
-    map.get().cam.setPosition();
+    // map.get().events.emit('CAMERA_MOVE', scope.target)
+    map.get().events.emit('CAMPOS_ON_SURFACE_MOVE', scope.target);
+
 
 		switch ( event.keyCode ) {
 
@@ -837,7 +841,7 @@ THREE.MapControls = function ( object, domElement ) {
 
 		event.preventDefault();
 
-		map.get().cam.setPosition();
+    // map.get().events.emit('CAMERA_MOVE', scope.target);
 
 		switch ( state ) {
 
@@ -860,6 +864,8 @@ THREE.MapControls = function ( object, domElement ) {
 			case STATE.PAN:
 
 				if ( scope.enablePan === false ) return;
+
+        map.get().events.emit('CAMPOS_ON_SURFACE_MOVE', scope.target);
 
 				handleMouseMovePan( event );
 
@@ -957,7 +963,7 @@ THREE.MapControls = function ( object, domElement ) {
 		event.preventDefault();
 		event.stopPropagation();
 
-    map.get().cam.setPosition();
+    // map.get().events.emit('CAMERA_MOVE', scope.target);
 
 		switch ( event.touches.length ) {
 
@@ -965,6 +971,8 @@ THREE.MapControls = function ( object, domElement ) {
 
 				if ( scope.enablePan === false ) return;
 				if ( state !== STATE.PAN ) return; // is this needed?
+
+        map.get().events.emit('CAMPOS_ON_SURFACE_MOVE', scope.target);
 
 				handleTouchMovePan( event );
 

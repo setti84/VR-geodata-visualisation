@@ -5,7 +5,7 @@ class MapApp {
     this.zoom = options.zoom || 18;
     this.position = new LatLng(options.position.lat, options.position.lng, this.zoom) || new LatLng( 52.545, 13.355, this.zoom);
     this.debugging = options.debugging || false;
-    this.maptiles = options.maptiles || 'mapbox';
+    this.tiles = new Tiles(this.position);
     this.threeScene;
     this.threeCamera;
     this.threeRenderer;
@@ -14,25 +14,58 @@ class MapApp {
     this.events = new Events();
     this.textureManager = new TextureManager();
     this.cam = new MapCamera(this.position, this.threeCamera);
+    this.workerPool = new Workerpool();
 
+    this.addEvents();
+
+    //debugging
+    const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    const cube = new THREE.Mesh( geometry, material );
     if(this.debugging){
-
       const axesHelper = new THREE.AxesHelper( 150 );
       this.threeScene.add(axesHelper);
-
-      var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-      var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-      var cube = new THREE.Mesh( geometry, material );
       this.threeScene.add( cube );
-      const animate = () => {
-        cube.position.set(this.cam.newPosOnMapPane.x, this.cam.newPosOnMapPane.y, this.cam.newPosOnMapPane.z);
-        requestAnimationFrame(animate);
-      }
-      animate();
-
     }
 
+    this.threeRenderer.setAnimationLoop( () => {
+      if(this.debugging){
+        cube.position.set(this.cam.camPosOnSurface.x, this.cam.camPosOnSurface.y, this.cam.camPosOnSurface.z);
+      }
+      this.threeRenderer.render(this.threeScene, this.threeCamera);
+    } );
 
+  }
+
+  addEvents() {
+
+    // this.events.on('CAMERA_MOVE', target => {
+    //     this.cam.setPosition(target);
+    //     this.cam.movementWatcher.search();
+    // });
+
+    this.events.on('CAMPOS_ON_SURFACE_MOVE', target => {
+      this.cam.setPosition(target);
+      // this.cam.movementWatcher.search();
+    });
+
+    document.getElementById('mapzoom-plus').addEventListener('click', () => {
+
+      // this.workerPool.postMessage('this is the message')
+
+      // this.workerPool.postMessage({type: 'baseTile', tileID: 123});
+      // this.workerPool.postMessage({type: 'baseTile', tileID: 234});
+
+
+    });
+
+    document.getElementById('mapzoom-minus').addEventListener('click', () => this.events.emit('MAP_HEIGHT_CHANGE', 3));
+
+
+    this.events.on('MAP_HEIGHT_CHANGE', change => {
+
+
+    });
 
   }
 
@@ -47,11 +80,13 @@ class MapApp {
     this.threeRenderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.threeRenderer.domElement);
 
-    this.threeCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+    document.body.appendChild( WEBVR.createButton( this.threeRenderer ) );
+    // this.threeRenderer.vr.enabled = true;
+
+    this.threeCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 3000);
     this.threeCamera.position.set(0, CAMERAHEIGHT, 0);
 
     // controls
-
     const controls = new THREE.MapControls(this.threeCamera, this.threeRenderer.domElement);
     controls.screenSpacePanning = false;
     controls.minDistance = 5;
@@ -60,11 +95,16 @@ class MapApp {
 
     // lights
 
+    // light needs to walk with the camera
+    // var light = new THREE.PointLight( 0xffffff, 1, 1800 );
+    // light.position.set( 0,150, 0 );
+    // this.threeScene.add( light );
+
     var light = new THREE.DirectionalLight(0xffffff);
     light.position.set(1, 1, 1);
     this.threeScene.add(light);
 
-    var light = new THREE.DirectionalLight(0x002288);
+    var light = new THREE.DirectionalLight(0xffffff);
     light.position.set(-1, -1, -1);
     this.threeScene.add(light);
 
@@ -74,7 +114,6 @@ class MapApp {
     window.addEventListener('resize', () => {
       this.threeCamera.aspect = window.innerWidth / window.innerHeight;
       this.threeCamera.updateProjectionMatrix();
-
       this.threeRenderer.setSize(window.innerWidth, window.innerHeight);
     }, false);
 
@@ -97,68 +136,13 @@ class MapApp {
 
     }
 
-    this.cam.addMovementWatcher();
+    // this.cam.addMovementWatcher();
+    this.tiles.update(this.position)
 
   }
 
 }
 
-
-// initScale() {
-//
-//
-//
-//   let target;
-//   this.scale.addEventListener('input', (e) => {
-//
-//     target = (e.target) ? e.target : e.srcElement;
-//
-//     // this.events.emit('MAP_HEIGHT_CHANGE', e.deltaY);
-//
-//
-//     console.log(0+parseInt(this.scaleFactor))
-//
-//     this.scaleFactor = target.value;
-//     // this.changeScale();
-//     this.camera.position.set(this.camera.position.x, 0+parseInt(this.scaleFactor), this.camera.position.z);
-//     // calculation: (max-1)*Math.pow(val, strength) + min;
-//     // temp = (4-1)*Math.pow(target.value, 2.5);
-//     // // set minimum value to 0.00003
-//     // temp = temp < 0.07 ? 0.07 : temp;
-//
-//   })
-//
-// }
-
-// changeScale() {
-//
-//   // this.camera.scale.set(this.camera.scale.x/this.oldScaleFactor*this.scaleFactor, this.camera.scale.y, this.camera.scale.z/this.oldScaleFactor*this.scaleFactor);
-//
-//
-//   // console.log(this.oldScaleFactor)
-//   // console.log(this.scaleFactor)
-//   // this.threeScene.children.forEach( e => {
-//   //   if(e.type === 'Group' ) {
-//   //     if(e.name === 'buildings' || e.name === 'basemap') { // /this.oldScaleFactor*this.scaleFactor
-//   //
-//   //       e.position.set(e.position.x/this.oldScaleFactor*this.scaleFactor, e.position.y/this.oldScaleFactor*this.scaleFactor, e.position.z/this.oldScaleFactor*this.scaleFactor );
-//   //       e.scale.set(e.scale.x/this.oldScaleFactor*this.scaleFactor,  e.scale.y, e.scale.z/this.oldScaleFactor*this.scaleFactor );
-//   //
-//   //     }
-//   //   }
-//   // });
-//
-//   // this.oldScaleFactor = this.scaleFactor;
-//
-// }
-
-
-// this.scaleFactor = 1;
-// this.scale = document.getElementById("scale-slider");
-// this.initScale();
-
-// TODO: array(or map object?) with mother object for tiles? like plane geometry, building geometry, everything we need more than once for tiles?
-// TODO: Scaling: buildings should be closer together, maptiles needs to be improved
 
 // TODO: its not working, mabe use set interval to keep track of href and map position
 // const startPos = window.location.href.split("/");
@@ -169,16 +153,6 @@ class MapApp {
 //   console.log(this.position)
 // }
 
-
-// document.querySelector('#cameraRig').object3D.rotateX( -1 * change * Math.PI / 180); // 1*posY/180*Math.PI
-// document.querySelector('#zylinder').object3D.rotateOnAxis(new THREE.Vector3(1,0,0), -1 * change * Math.PI / 180);
-//   document.querySelector('#zylinder').object3D.rotateX( -1 * change * Math.PI / 180); // 1*posY/180*Math.PI
-// document.querySelector('#cameraRig').object3D.rotateX(-1*posY/180*Math.PI);
-// document.querySelector('#camera').object3D.position.set(this.camera.position.x, posY, this.camera.position.z);
-// console.log(posY, -1*posY/180*Math.PI)
-// console.log(document.querySelector('#cameraRig').object3D.rotation, this.camera.position)
-// console.log(document.querySelector('#cameraRig').object3D.rotation._x, -1*posY * Math.PI/180)
-// console.log(-1*posY * Math.PI/180 + Math.abs(document.querySelector('#cameraRig').object3D.rotation._x));
 
 
 // addEvents() {

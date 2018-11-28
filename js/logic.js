@@ -21,14 +21,10 @@ const init = () => {
 
   map.addTiles({mapTiles: 'mapbox', dataTiles: 'overpass'});
 
-  const animate = () => {
-
-    map.get().threeRenderer.render(map.get().threeScene, map.get().threeCamera);
-    requestAnimationFrame(animate);
-
-  }
-
-  animate();
+  // map.get().threeRenderer.setAnimationLoop( () => {
+  //   console.log('render')
+  //   map.get().threeRenderer.render(map.get().threeScene, map.get().threeCamera);
+  // } );
 
   const addStats = () => {
     javascript:(function () {

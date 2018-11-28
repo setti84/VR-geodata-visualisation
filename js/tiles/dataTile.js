@@ -1,18 +1,23 @@
 class DataTile extends Tile {
   // BaseMapTile are square flat polygons with with a rendered map view as a texture
 
-  constructor(origin, coords) {
-    super(origin, coords);
+  constructor(id,origin, coords) {
+    super(id,origin, coords);
     this.buildingGroup = new THREE.Group();
+
 
     //   TODO: order objects in categories (buildings,trees,...)
     //   TODO: add texture to objects (option to turn it on and off)
     //   TODO: use Events to check if all vector and texture data have loaded successfully
 
+    //https://c.data.osmbuildings.org/0.2/anonymous/tile/15/17606/10744.json
+
   }
 
   create() {
-    this.isLoading = true;
+
+    this.threeScene = map.get().threeScene;
+    this.state = 'loading';
 
     this.loadData()
       .then(res => this.processData(res))
@@ -42,9 +47,8 @@ class DataTile extends Tile {
 
     });
 
-    map.get().dataTiles.add(this.buildingGroup)
-
-    this.isLoaded = true;
+    map.get().dataTiles.add(this.buildingGroup);
+    this.state = 'loaded';
 
   }
 
@@ -160,18 +164,25 @@ class DataTile extends Tile {
 
   destroy() {
 
-    // TODO: try to aboard loading if tile is still in loading state
-    const waiting = setInterval(() => {
-      if (this.isLoaded) {
-        map.get().dataTiles.remove(this.buildingGroup);
-        this.buildingGroup.children.forEach(e => {
-          e.geometry.dispose();
-          e.material.dispose();
-        });
-        this.buildingGroup = undefined;
-        clearTimeout(waiting);
-      }
-    }, 200);
+    if(this.state === 'blank'){
+      this.buildingGroup = undefined;
+    }else if(this.state === 'loading' || this.state === 'loaded') {
+      // TODO: try to aboard loading if tile is still in loading state
+      const waiting = setInterval(() => {
+        if (this.state === 'loaded') {
+          map.get().dataTiles.remove(this.buildingGroup);
+          this.buildingGroup.children.forEach(e => {
+            e.geometry.dispose();
+            e.material.dispose();
+          });
+          this.buildingGroup = undefined;
+          clearTimeout(waiting);
+        }
+      }, 200);
+
+    }
+
+
 
   }
 

@@ -9,10 +9,8 @@ class MapCamera {
     this.originMercator = this.originlatLon.wgs2Mercator();
     this.newLatLng = new LatLng(latLng.lat, latLng.lng, latLng.zoom);
 
-    this.newCamPos = new THREE.Vector3();
-    this.newDirection = new THREE.Vector3(0, 0, -1);
-    this.newDistance = 0;
-    this.newPosOnMapPane = new THREE.Vector3();
+    this.camPosOnSurface = new THREE.Vector3();
+    this.positionchange = 0;
 
 
   }
@@ -26,31 +24,16 @@ class MapCamera {
   }
 
 
-  setPosition (){
+  setPosition (position){
 
-    // calculate camera position to map plane surface
-    this.newCamPos.set(this.threeCamera.position.x, this.threeCamera.position.y, this.threeCamera.position.z);
-    this.newDirection = this.newDirection.set(0,0,-1).applyEuler(this.threeCamera.rotation, this.threeCamera.rotation.order);
-    // only use values between zero and thousend, might be important if camera is horizontal and can never see the surface
-
-    // this.newDistance = util.clamp(this.threeCamera.position.y, 0,1000);
-    this.newDistance = util.clamp(Math.abs(this.threeCamera.position.y/Math.sin(this.threeCamera.rotation._x)), 0,1000); //this.threeCamera.position.y
-    this.newPosOnMapPane.addVectors(this.newCamPos, this.newDirection.multiplyScalar(this.newDistance));
-
-    console.log(this.threeCamera.quaternion._y*180/Math.PI)
-    console.log(this.threeCamera.rotation._x*180/Math.PI)
-    // console.log(Math.abs(this.threeCamera.position.y/Math.sin(this.threeCamera.rotation._x)))
-    // console.log('----')
+    this.camPosOnSurface = position;
 
     // TODO map-scaling here? if we change the scale here we dont change the scale for map tiles, scaling factor from mapApp element
     // add the new camera Position(or the point where the camera is looking) to the origin and thats where the new camera looking psoition is in LatLng
-    const coords = LatLng.unprojectWorldCoordinates(this.originMercator[0]+this.newPosOnMapPane.x, this.originMercator[1]-this.newPosOnMapPane.z);
+    const coords = LatLng.unprojectWorldCoordinates(this.originMercator[0]+this.camPosOnSurface.x, this.originMercator[1]-this.camPosOnSurface.z);
     this.newLatLng.setCoords(coords[0], coords[1]);
-
-    this.movementWatcher.search();
-
+    map.get().tiles.update(this.newLatLng);
     changeCoordinatesDisplay(this);
-
 
   }
 
