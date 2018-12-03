@@ -1,6 +1,3 @@
-// var Util = {
-//
-// }
 
 const util = function(){
 

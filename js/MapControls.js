@@ -89,6 +89,17 @@ THREE.MapControls = function ( object, domElement ) {
 	// public methods
 	//
 
+	this.setDolly = function (change) {
+		scale = change;
+		scope.update();
+	}
+
+  this.setTilt = function (change) {
+    scale = change;
+    scope.update();
+  }
+
+
 	this.getPolarAngle = function () {
 
 		return spherical.phi;
@@ -166,7 +177,6 @@ THREE.MapControls = function ( object, domElement ) {
 			spherical.phi = Math.max( scope.minPolarAngle, Math.min( scope.maxPolarAngle, spherical.phi ) );
 
 			spherical.makeSafe();
-
 
 			spherical.radius *= scale;
 
@@ -274,7 +284,7 @@ THREE.MapControls = function ( object, domElement ) {
 	var spherical = new THREE.Spherical();
 	var sphericalDelta = new THREE.Spherical();
 
-	var scale = 1;
+  var scale = 1;
 	var panOffset = new THREE.Vector3();
 	var zoomChanged = false;
 
@@ -400,7 +410,7 @@ THREE.MapControls = function ( object, domElement ) {
 
 	}();
 
-	function dollyIn( dollyScale ) {
+	function dollyIn ( dollyScale ) {
 
 		if ( scope.object.isPerspectiveCamera ) {
 
@@ -536,8 +546,6 @@ THREE.MapControls = function ( object, domElement ) {
 
 	function handleMouseWheel( event ) {
 
-		// console.log( 'handleMouseWheel' );
-
 		if ( event.deltaY < 0 ) {
 
 			dollyOut( getZoomScale() );
@@ -584,7 +592,9 @@ THREE.MapControls = function ( object, domElement ) {
 
 		}
 
-	}
+   map.get().events.emit('MAP_URL_CHANGE', `${map.get().cam.newLatLng.zoom}/${parseFloat(map.get().cam.newLatLng.lat).toFixed(6)}/${parseFloat(map.get().cam.newLatLng.lng).toFixed(6)}`);
+
+  }
 
 	function handleTouchStartRotate( event ) {
 
@@ -877,6 +887,8 @@ THREE.MapControls = function ( object, domElement ) {
 
 	function onMouseUp( event ) {
 
+    map.get().events.emit('MAP_URL_CHANGE', `${map.get().cam.newLatLng.zoom}/${parseFloat(map.get().cam.newLatLng.lat).toFixed(6)}/${parseFloat(map.get().cam.newLatLng.lng).toFixed(6)}`);
+
 		if ( scope.enabled === false ) return;
 
 		handleMouseUp( event );
@@ -893,6 +905,8 @@ THREE.MapControls = function ( object, domElement ) {
 	function onMouseWheel( event ) {
 
 		if ( scope.enabled === false || scope.enableZoom === false || ( state !== STATE.NONE && state !== STATE.ROTATE ) ) return;
+
+
 
 		event.preventDefault();
 		event.stopPropagation();
@@ -1004,7 +1018,9 @@ THREE.MapControls = function ( object, domElement ) {
 
 		if ( scope.enabled === false ) return;
 
-		handleTouchEnd( event );
+    map.get().events.emit('MAP_URL_CHANGE', `${map.get().cam.newLatLng.zoom}/${parseFloat(map.get().cam.newLatLng.lat).toFixed(6)}/${parseFloat(map.get().cam.newLatLng.lng).toFixed(6)}`);
+
+    handleTouchEnd( event );
 
 		scope.dispatchEvent( endEvent );
 

@@ -1,3 +1,76 @@
+
+class Workerpool {
+
+  constructor () {
+    this.workerPoolSize = this.workerCheckFrequency = navigator.hardwareConcurrency - 1 || 3;
+    this.pool = [];
+
+    for (let i = 0; i < this.workerPoolSize; i++) {
+      this.addWorker();
+    }
+
+    this.currentWorker = 0;
+
+  }
+
+  postMessage(args){
+
+    this.pool[this.currentWorker].worker.postMessage({tile:args, workernumber:1});
+    this.currentWorker = this.currentWorker === this.workerPoolSize - 1 ? 0 : this.currentWorker + 1;
+
+    // this checks in an interval of workerCheckFrequency if worker are dead. If so new worker are added otherwise it starts counting again
+    // TODO: never really checked this
+    this.workerCheckFrequency--;
+    if(this.workerCheckFrequency<0){
+      this.workerCheckFrequency = 3;
+      while (this.pool.length < this.workerPoolSize) {
+        console.log('add new Worker to pool')
+        this.addWorker();
+      }
+    }
+
+
+
+
+    // let worker;
+    // for(let i = 0; i < this.pool.length ; i++){
+    //   worker = this.pool[i];
+    //   if(!worker.isbusy){
+    //     worker.isbusy = true;
+    //     worker.worker.postMessage({tile:args, workernumber:i});
+    //     return;
+    //   }
+    // }
+    // setTimeout(() => this.postMessage(args), 100);
+    //
+    // // this checks in an interval of workerCheckFrequency if worker are dead. If so new worker are added otherwise it starts counting again
+    // this.workerCheckFrequency--;
+    // if(this.workerCheckFrequency<0){
+    //   this.workerCheckFrequency = 3;
+    //   while (this.pool.length < this.workerPoolSize) {
+    //     console.log('add new Worker to pool')
+    //     this.addWorker();
+    //   }
+    // }
+
+  }
+
+  addWorker(){
+
+    const workerObj = {worker: new Worker('./js/worker/worker.js'), isbusy:false};
+    workerObj.worker.addEventListener('message', (e) => {
+      if(map.get().tiles.pool.has(e.data.data.tile.id)){
+        map.get().tiles.pool.get(e.data.data.tile.id).receiveData(e.data);
+      }
+      this.pool[e.data.data.workernumber].isbusy = false;
+    }, false);
+
+    this.pool.push(workerObj);
+
+  }
+
+
+
 /*
 
 Queue.js
@@ -14,61 +87,73 @@ http://creativecommons.org/publicdomain/zero/1.0/legalcode
 /* Creates a new queue. A queue is a first-in-first-out (FIFO) data structure -
  * items are added to the end of the queue and removed from the front.
  */
-function Queue() {
-
-  // initialise the queue and offset
-  var queue = [];
-  var offset = 0;
-
-  // Returns the length of the queue.
-  this.getLength = function () {
-    return (queue.length - offset);
-  }
-
-  // Returns true if the queue is empty, and false otherwise.
-  this.isEmpty = function () {
-    return (queue.length == 0);
-  }
-
-  /* Enqueues the specified item. The parameter is:
-   *
-   * item - the item to enqueue
-   */
-  this.enqueue = function (item) {
-    queue.push(item);
-  }
-
-  /* Dequeues an item and returns it. If the queue is empty, the value
-   * 'undefined' is returned.
-   */
-  this.dequeue = function () {
-
-    // if the queue is empty, return immediately
-    if (queue.length == 0) return undefined;
-
-    // store the item at the front of the queue
-    var item = queue[offset];
-
-    // increment the offset and remove the free space if necessary
-    if (++offset * 2 >= queue.length) {
-      queue = queue.slice(offset);
-      offset = 0;
-    }
-
-    // return the dequeued item
-    return item;
-
-  }
-
-  /* Returns the item at the front of the queue (without dequeuing it). If the
-   * queue is empty then undefined is returned.
-   */
-  this.peek = function () {
-    return (queue.length > 0 ? queue[offset] : undefined);
-  }
-}
 
 
+// function Queue() {
+//
+//   // initialise the queue and offset
+//   var queue = [];
+//   var offset = 0;
+//
+//   // Returns the length of the queue.
+//   this.getLength = function () {
+//     return (queue.length - offset);
+//   }
+//
+//   // Returns true if the queue is empty, and false otherwise.
+//   this.isEmpty = function () {
+//     return (queue.length == 0);
+//   }
+//
+//   /* Enqueues the specified item. The parameter is:
+//    *
+//    * item - the item to enqueue
+//    */
+//   this.enqueue = function (item) {
+//     queue.push(item);
+//   }
+//
+//   /* Dequeues an item and returns it. If the queue is empty, the value
+//    * 'undefined' is returned.
+//    */
+//   this.dequeue = function () {
+//
+//     // if the queue is empty, return immediately
+//     if (queue.length == 0) return undefined;
+//
+//     // store the item at the front of the queue
+//     var item = queue[offset];
+//
+//     // increment the offset and remove the free space if necessary
+//     if (++offset * 2 >= queue.length) {
+//       queue = queue.slice(offset);
+//       offset = 0;
+//     }
+//
+//     // return the dequeued item
+//     return item;
+//
+//   }
+//
+//   /* Returns the item at the front of the queue (without dequeuing it). If the
+//    * queue is empty then undefined is returned.
+//    */
+//   this.peek = function () {
+//     return (queue.length > 0 ? queue[offset] : undefined);
+//   }
+// }
+
+// start(){
+//   setInterval(() =>{
+//     if(!this.queue.isEmpty()){
+//       console.log('not empty')
+//
+//     }else {
+//       console.log('empty')
+//     }
+//
+//   }, 100);
+// }
 
 
 
@@ -78,80 +163,40 @@ function Queue() {
 
 
 
-  class Workerpool {
 
-  constructor () {
-    this.workerPoolSize = navigator.hardwareConcurrency - 1 || 3;
-    this.queue = new Queue();
-    this.pool = [];
 
-    // this.pool2 = new Map();
-    //
-    // for (let i = 0; i < this.workerPoolSize; i++) {
-    //   // workernumber, if worker is busy, worker, function on worker(needed for removing event listener)
-    //   this.pool2.set(i ,{ isbusy: false, worker: new Worker('./js/worker/worker.js'), workerJob: function(){}})
-    // }
-    //
-    // console.log(this.pool2)
 
-    for (let i = 0; i < this.workerPoolSize; i++) {
-      const workerObj = {worker: new Worker('./js/worker/worker.js'), isbusy:false};
-      workerObj.worker.addEventListener('message', (e) => {
-      //  find right tile from list
-      //   console.log(JSON.parse(this.pool[e.data.workernumber].isbusy))
-        // console.log(e.data)
 
-        if(map.get().tiles.pool.has(e.data.data.tile.id)){
-          map.get().tiles.pool.get(e.data.data.tile.id).receiveData(e.data);
-        }
-        this.pool[e.data.data.workernumber].isbusy = false;
 
-      }, false);
 
-      this.pool.push(workerObj)
-    }
-    //
-    // console.log('size of worker pool: ' + this.workerPoolSize);
-    //
-    // this.currentWorker = 0;
 
-    console.log(this.pool)
 
-  }
 
-  start(){
-    setInterval(() =>{
-      if(!this.queue.isEmpty()){
-        console.log('not empty')
 
-      }else {
-        console.log('empty')
-      }
 
-    }, 100);
-  }
 
-  postMessage(args){
-    // console.log('post something to worker nummer: ' + this.pool)
-    console.log(args)
-    // this.queue.enqueue(args);
 
-    let worker;
-    for(let i = 0; i < this.pool.length ; i++){
 
-      worker = this.pool[i];
-      if(!worker.isbusy){
-        // console.log('bin in post message')
-        worker.isbusy = true;
-        worker.worker.postMessage({tile:args, workernumber:i});
-        break;
-      }
-      if(i === this.pool.length-1){
-        // console.log('bin im set timeout voon zuvielen workern')
-        setTimeout(() => this.postMessage(args), 200);
 
-      }
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // const worker = this.pool[this.currentWorker];
     // worker.postMessage({tile:args, workernumber:i});
@@ -183,7 +228,6 @@ function Queue() {
 
 
 
-  }
 
   // removeListener(workernumber){
   //

@@ -19,9 +19,9 @@ class MapCamera {
     return this.threeCamera.getWorldPosition();
   }
 
-  addMovementWatcher () {
-    this.movementWatcher = new MovementWatcher(this.originlatLon, this.newLatLng);
-  }
+  // addMovementWatcher () {
+  //   this.movementWatcher = new MovementWatcher(this.originlatLon, this.newLatLng);
+  // }
 
 
   setPosition (position){
@@ -32,8 +32,10 @@ class MapCamera {
     // add the new camera Position(or the point where the camera is looking) to the origin and thats where the new camera looking psoition is in LatLng
     const coords = LatLng.unprojectWorldCoordinates(this.originMercator[0]+this.camPosOnSurface.x, this.originMercator[1]-this.camPosOnSurface.z);
     this.newLatLng.setCoords(coords[0], coords[1]);
+    // map.get().events.emit('MAP_URL_CHANGE', `${this.newLatLng.zoom}/${parseFloat(this.newLatLng.lat).toFixed(6)}/${parseFloat(this.newLatLng.lng).toFixed(6)}`)
+    // console.log(this.newLatLng)
     map.get().tiles.update(this.newLatLng);
-    changeCoordinatesDisplay(this);
+    // changeCoordinatesDisplay(this);
 
   }
 

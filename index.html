@@ -21,7 +21,6 @@
 
     <script src="./js/events.js"></script>
     <script src="./js/textureManager.js"></script>
-    <script src="./js/movementWatcher.js"></script>
     <script src="./js/mapCamera.js"></script>
     <script src="./js/point/point.js"></script>
     <script src="./js/point/latLng.js"></script>
@@ -32,19 +31,39 @@
     <script src="js/tiles/baseTile.js"></script>
     <script src="js/tiles/dataTile.js"></script>
 
-    <script src="./js/user.js"></script>
-
     <script src="./js/mapApp.js"></script>
+
+
+<!--
+    <script type="x-shader/x-vertex" id="vertexShader">
+            uniform float amplitude;
+			varying vec3 vWorldPosition;
+			uniform vec3 color;
+			void main() {
+				vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+				vWorldPosition = worldPosition.xyz;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+-->
 </head>
 
 
 <body>
+
 
 <div class="mapzom-button">
     <input class="mapzom-button-plus-minus" id="mapzoom-plus" type="button" value="+"/>
     <br>
     <input class="mapzom-button-plus-minus" id="mapzoom-minus" type="button" value="-"/>
 </div>
+
+<div class="maptilt-button">
+    <input class="maptilt-button-plus-minus" id="maptilt-plus" type="button" value="+"/>
+    <br>
+    <input class="maptilt-button-plus-minus" id="maptilt-minus" type="button" value="-"/>
+</div>
+
 
 <div id="text"></div>
 

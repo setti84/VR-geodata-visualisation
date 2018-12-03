@@ -6,20 +6,20 @@ const init = () => {
     document.body.appendChild( WEBGL.getWebGLErrorMessage() );
   }
 
-// new LatLng( 52.54591075494661, 13.355914950370789, 18 );   //Berlin beuth
-// new LatLng(40.72372, -73.98922);   // New York
+// new LatLng( 52.54591075494661, 13.355914950370789, 18 ); {lat: 52.54591075494661, lng: 13.355914950370789}   //Berlin beuth
+// {lat: 40.72372, lng: -73.98922};   // New York
 // new LatLng(1.29422,103.85411);        // Singapore
 // new LatLng(0,0);
 
   map = new MapApp({
     zoom: 19,
-    position: {lat: 52.54591075494661, lng: 13.3559149503707}, //  {lat:40.714126602154664, lng: -74.0062665939331}
-    debugging: true,
+    position: {lat: 52.54591075494661, lng: 13.355914950370789}, //  {lat:40.714126602154664, lng: -74.0062665939331}
+    debugging: false,
   });
 
   // map.addEvents();
 
-  map.addTiles({mapTiles: 'mapbox', dataTiles: 'overpass'});
+  map.addTiles({mapTiles: 'mapbox', dataTiles: 'buildings'});
 
   // map.get().threeRenderer.setAnimationLoop( () => {
   //   console.log('render')

@@ -34,6 +34,22 @@ body {
 
 .mapzom-button-plus-minus {
   cursor: pointer;
- height: 40px;
+  height: 40px;
+  width: 40px;
+}
+
+.maptilt-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: linen;
+  border-radius: 5px;
+  z-index: 1;
+  padding: 5px;
+}
+
+.maptilt-button-plus-minus {
+  cursor: pointer;
+  height: 40px;
   width: 40px;
 }

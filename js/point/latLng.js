@@ -39,6 +39,16 @@ class LatLng extends Point{
     return [parseInt(Math.ceil(px/parseFloat(TILE_SIZE))-1), parseInt(Math.ceil(py/parseFloat(TILE_SIZE))-1)]
   }
 
+  // this function is for OSMB where tiles only exist in Zoomlevel 15. We need this to generate tiles
+  OSMBmerc2Tile () {
+    // "Returns tile for given mercator coordinates"
+    const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,OSMB_TILE_ZOOM));
+    const px = (this.mercatorCoord[0]+ORIGINSHIFT)/res;
+    const py = (this.mercatorCoord[1]+ORIGINSHIFT)/res;
+
+    return [parseInt(Math.ceil(px/parseFloat(TILE_SIZE))-1), parseInt(Math.ceil(py/parseFloat(TILE_SIZE))-1)]
+  }
+
   googleTiles () {
     return [this.merc2Tile()[0], (Math.pow(2,this.zoom) - 1) - this.merc2Tile()[1]]
   }

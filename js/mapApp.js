@@ -6,20 +6,20 @@ class MapApp {
     this.position = new LatLng(options.position.lat, options.position.lng, this.zoom) || new LatLng( 52.545, 13.355, this.zoom);
     this.debugging = options.debugging || false;
     this.tiles = new Tiles(this.position);
-    this.threeScene;
-    this.threeCamera;
-    this.threeRenderer;
+    this.threeScene = null;
+    this.threeCamera = null;
+    this.threeRenderer = null;
     this.initScene();
 
     this.events = new Events();
-    this.textureManager = new TextureManager();
+    // this.textureManager = new TextureManager();
     this.cam = new MapCamera(this.position, this.threeCamera);
     this.workerPool = new Workerpool();
 
     this.addEvents();
 
     //debugging
-    const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    const geometry = new THREE.BoxGeometry( 5, 5, 5 );
     const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
     const cube = new THREE.Mesh( geometry, material );
     if(this.debugging){
@@ -28,44 +28,63 @@ class MapApp {
       this.threeScene.add( cube );
     }
 
+    let timer = 0;
+
     this.threeRenderer.setAnimationLoop( () => {
+      // uniforms.amplitude.value = util.clamp(uniforms.amplitude.value+0.01,0,1);
       if(this.debugging){
         cube.position.set(this.cam.camPosOnSurface.x, this.cam.camPosOnSurface.y, this.cam.camPosOnSurface.z);
       }
+      timer=util.clamp(timer+0.01,0,1);
       this.threeRenderer.render(this.threeScene, this.threeCamera);
-    } );
 
+    });
+    console.log(this.threeRenderer.info)
+
+    this.setUrlHash();
+
+  }
+
+  mapOriginChange(){
+    console.log('map origin change')
+  }
+
+  setUrlHash() {
+    // set hash if none is in URL
+    if(window.location.hash.length === 0){
+      this.events.emit('MAP_URL_CHANGE', `${this.position.zoom}/${parseFloat(this.position.lat).toFixed(6)}/${parseFloat(this.position.lng).toFixed(6)}`);
+    }else {
+      // // set map on this position
+      // const position = window.location.hash;
+      // const zoomLatLng = position.split('/');
+      // this.position = new LatLng(zoomLatLng[1], zoomLatLng[2], this.zoom) || new LatLng( 52.545, 13.355, this.zoom);
+      // this.mapOriginChange();
+    }
   }
 
   addEvents() {
 
-    // this.events.on('CAMERA_MOVE', target => {
-    //     this.cam.setPosition(target);
-    //     this.cam.movementWatcher.search();
-    // });
+    this.events.on('MAP_URL_CHANGE', position => {
+      window.location.hash = `${position}`;
+    });
 
     this.events.on('CAMPOS_ON_SURFACE_MOVE', target => {
       this.cam.setPosition(target);
-      // this.cam.movementWatcher.search();
     });
-
-    document.getElementById('mapzoom-plus').addEventListener('click', () => {
-
-      // this.workerPool.postMessage('this is the message')
-
-      // this.workerPool.postMessage({type: 'baseTile', tileID: 123});
-      // this.workerPool.postMessage({type: 'baseTile', tileID: 234});
-
-
-    });
-
-    document.getElementById('mapzoom-minus').addEventListener('click', () => this.events.emit('MAP_HEIGHT_CHANGE', 3));
-
 
     this.events.on('MAP_HEIGHT_CHANGE', change => {
-
-
+      this.controls.setDolly(change);
     });
+
+    this.events.on('MAP_TILT_CHANGE', change => {
+      this.controls.setTilt(change);
+    });
+
+    document.getElementById('mapzoom-plus').addEventListener('click', () => this.events.emit('MAP_HEIGHT_CHANGE', 0.8) );
+    document.getElementById('mapzoom-minus').addEventListener('click', () => this.events.emit('MAP_HEIGHT_CHANGE', 1.4));
+
+    document.getElementById('maptilt-plus').addEventListener('click', () => this.events.emit('MAP_TILT_CHANGE', 0.8) );
+    document.getElementById('maptilt-minus').addEventListener('click', () => this.events.emit('MAP_TILT_CHANGE', 1.4));
 
   }
 
@@ -83,15 +102,16 @@ class MapApp {
     document.body.appendChild( WEBVR.createButton( this.threeRenderer ) );
     // this.threeRenderer.vr.enabled = true;
 
-    this.threeCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 3000);
+    this.threeCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 15000);
     this.threeCamera.position.set(0, CAMERAHEIGHT, 0);
 
     // controls
-    const controls = new THREE.MapControls(this.threeCamera, this.threeRenderer.domElement);
-    controls.screenSpacePanning = false;
-    controls.minDistance = 5;
-    controls.maxDistance = 500000;
-    controls.maxPolarAngle = 1.2;
+    this.controls = new THREE.MapControls(this.threeCamera, this.threeRenderer.domElement);
+    this.controls.screenSpacePanning = false;
+    this.controls.minDistance = 5;
+    this.controls.maxDistance = 500000;
+    this.controls.maxPolarAngle = 1.2;
+
 
     // lights
 
@@ -130,121 +150,20 @@ class MapApp {
     this.threeScene.add(this.mapTiles);
 
     if(options.dataTiles){
+      console.log('add datatiles')
       this.dataTiles = new THREE.Group();
       this.dataTiles.name = options.dataTiles || 'buildings';
       this.threeScene.add(this.dataTiles);
 
     }
-
-    // this.cam.addMovementWatcher();
+    // init tile loading
     this.tiles.update(this.position)
 
   }
 
 }
 
-
-// TODO: its not working, mabe use set interval to keep track of href and map position
-// const startPos = window.location.href.split("/");
-// // console.log(startPos)
-// if(startPos.length === 8){
-//   // http://localhost/git/aframeCameraPosition/#/19/56
-//   this.position = new LatLng( startPos[startPos.length-1], startPos[startPos.length-2], this.zoom );
-//   console.log(this.position)
-// }
-
-
-
-// addEvents() {
-//
-//   // // Prevent to open context menu on right click
-//   // document.body.addEventListener("contextmenu", (e) => {
-//   //   e.stopPropagation();
-//   //   e.preventDefault();
-//   // });
-//   //
-//   // document.body.addEventListener("wheel", (e) => {
-//   //   this.events.emit('MAP_HEIGHT_CHANGE', e.deltaY);
-//   // });
-//   //
-//   // document.body.addEventListener("mousemove", (e) => {
-//   //   e.stopPropagation();
-//   //   e.preventDefault();
-//   //   this.events.emit('MOUSE_POSITION_CHANGE', e);
-//   // });
-//   //
-//   // document.getElementById('mapzoom-plus').addEventListener("click", () => this.events.emit('MAP_HEIGHT_CHANGE', -3));
-//   // document.getElementById('mapzoom-minus').addEventListener("click", () => this.events.emit('MAP_HEIGHT_CHANGE', 3));
-//
-//   // this.events.on('MAP_HEIGHT_CHANGE', change => {
-//   //
-//   //   let posY = this.cam.getPosition().y;
-//   //   let newPosY = util.clamp(parseInt(this.camera.position.y)+change, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT);
-//   //
-//   //   // (posY <= 90 && posY > 1) ? this.cam.setRotationX(change):false;
-//   //   this.cam.setHeight(newPosY);
-//   //
-//   // });
-//
-//   // this.events.on('MOUSE_POSITION_CHANGE', e => {
-//   //
-//   //   // left button
-//   //   if(e.buttons === 1){
-//   //     this.events.emit('MAP_POSITION_CHANGE', e);
-//   //
-//   //     // right button
-//   //   } else if(e.buttons === 2){
-//   //     this.events.emit('MAP_ROTATION_CHANGE', e);
-//   //   }
-//   //
-//   // });
-//
-//   // this.events.on('MAP_POSITION_CHANGE', e => {
-//   //
-//   //   // util.showMatrix(this.camera.matrixWorld);
-//   //
-//   //   // util.showMatrix(this.camera.modelViewMatrix);
-//   //
-//   //   // console.log(this.camera);
-//   //
-//   //   const pos = this.cam.getPosition();
-//   //   this.cam.setPosition({x: pos.x+(e.movementX*MOVINGFACTOR_MOUSE*-1), y: pos.y, z: pos.z+(-1*e.movementY*MOVINGFACTOR_MOUSE)});
-//   //
-//   // });
-//
-//   // let oldAngle = 45;
-//   //
-//   // this.events.on('MAP_ROTATION_CHANGE', change => {
-//   //   // console.log('mousemovement button 2', change)
-//   //   // this.cam.setRotationY(change.movementX);
-//   //   let newAngle = util.clamp(oldAngle+(change.movementY/2),0.01,90)
-//   //   //
-//   //   oldAngle = newAngle;
-//   //   this.cam.setRotationTest(newAngle)
-//   //   // this.cam.setRotationTest(change.movementY)
-//   //
-//   // });
-//
-//   // document.body.addEventListener("click", (e) => {
-//   //   e.stopPropagation();
-//   //   e.preventDefault();
-//   //
-//   // });
-//   //
-//   // document.body.addEventListener("mousedown", (e) => {
-//   //   e.stopPropagation();
-//   //   e.preventDefault();
-//   //
-//   // });
-//
-//
-// }
-
-
 /*
-
-
-
 performance
 
 staendige if abfrage ob framrate schlecht ist. Wenn ja dann abschalten von: Schatten, shadows,
