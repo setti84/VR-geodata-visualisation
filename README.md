@@ -3,9 +3,10 @@
 This website is a project of the class of Interaktive Geomediengestaltung at the 
 Beuth university in Winter 2018.
 
-![Example view](examplePic.png "Example view")
+![Example view](example.png "Example view")
 
-###Roadmap:
+
+### Roadmap:
 
 * VR support with controller 
 * buttons rotate
