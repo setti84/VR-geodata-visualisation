@@ -7,6 +7,8 @@ class DataTile extends Tile {
     this.tileMiddle = this.gettileMiddle();
     this.calculateDistanceToOrigin(origin);
     this.meshes = [];
+    this.amplitude = 0.1;
+    this.materialshader;
 
     //   TODO: order objects in categories (buildings,trees,...)
     //   TODO: add texture to objects (option to turn it on and off)
@@ -36,7 +38,6 @@ class DataTile extends Tile {
       type: 'dataTile',
       id: this.id,
       zoom :OSMB_TILE_ZOOM,
-      // mercator: this.origin.wgs2Mercator(),
       tileCoords: this.tileCoords,
       bounds: this.bounds,
       tileMiddle: this.tileMiddle,
@@ -58,110 +59,46 @@ class DataTile extends Tile {
     // console.log(data)
     const tile = data.data.tile;
 
-    // const chunks = 1;
-    // const posLength = data.vertices.length/3/chunks;
-    // let start=0;
-    // let endPos=posLength;
-    // let vertices,normal,uv;
-    //
-    // const mesh = new THREE.Mesh();
-    // // const geometry = new THREE.BufferGeometry();
-    // const buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5}); //  0xcac8d2
-    //
-    // console.log(data.uv.length)
-    // console.log(data.vertices.length)
-    //
-    // for(let i = 1; i< chunks+1;i++){
-    //   // console.log(i)
-    //   console.log(start,endPos)
-    //   vertices = data.vertices.slice(start*3,endPos*3);
-    //   normal = data.normal.slice(start*3,endPos*3);
-    //   uv = data.uv.slice(start*2,endPos*2);
-    //   start=(posLength*i)+(1*i);
-    //   endPos=(posLength*(i+1))+(1*i)
-    //
-    //   console.log(vertices.length,normal.length, uv.length)
-    //
-    //   const geometry = new THREE.BufferGeometry();
-    //   geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-    //   geometry.addAttribute( 'normal', new THREE.BufferAttribute( normal, 3 ) );
-    //   // geometry.addAttribute( 'color', new THREE.BufferAttribute( data.color, 3 ) );
-    //   geometry.addAttribute( 'uv', new THREE.BufferAttribute( uv, 2 ) );
-    //
-    //   const mesh = new THREE.Mesh(geometry, buildingMaterial);
-    //   mesh.rotation.x = -Math.PI / 2; // 90 degree
-    //   mesh.rotateZ(Math.PI);
-    //   mesh.material.side = THREE.DoubleSide;
-    //   mesh.position.set(-1*this.pos[0], 1, this.pos[1]);
-    //
-    //   this.meshes.push(mesh);
-    // }
 
-    // const chunks = 1;
-    // const posLength = data.vertices.length/3/chunks;
-    // let start=0;
-    // let endPos=posLength;
-    // let vertices,normal,uv;
-    //
-    // const mesh = new THREE.Mesh();
-    // // const geometry = new THREE.BufferGeometry();
-    // const buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5}); //  0xcac8d2
-    //
-    // console.log(data.uv.length)
-    // console.log(data.vertices.length)
-    //
-    // for(let i = 1; i< chunks+1;i++){
-    //   // console.log(i)
-    //   console.log(start,endPos)
-    //   vertices = data.vertices.slice(start*3,endPos*3);
-    //   normal = data.normal.slice(start*3,endPos*3);
-    //   uv = data.uv.slice(start*2,endPos*2);
-    //   start=(posLength*i)+(1*i);
-    //   endPos=(posLength*(i+1))+(1*i)
-    //
-    //   console.log(vertices.length,normal.length, uv.length)
-    //
-    //   const geometry = new THREE.BufferGeometry();
-    //   geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-    //   geometry.addAttribute( 'normal', new THREE.BufferAttribute( normal, 3 ) );
-    //   // geometry.addAttribute( 'color', new THREE.BufferAttribute( data.color, 3 ) );
-    //   geometry.addAttribute( 'uv', new THREE.BufferAttribute( uv, 2 ) );
-    //
-    //   const mesh = new THREE.Mesh(geometry, buildingMaterial);
-    //   mesh.rotation.x = -Math.PI / 2; // 90 degree
-    //   mesh.rotateZ(Math.PI);
-    //   mesh.material.side = THREE.DoubleSide;
-    //   mesh.position.set(-1*this.pos[0], 1, this.pos[1]);
-    //
-    //   this.meshes.push(mesh);
-    // }
+    /*
 
-    // const vertexShader = document.getElementById( 'vertexShader' ).textContent;
-    // const uniforms = {
-    //   amplitude: {value:1.0},
-    //   color: { value: new THREE.Color( 0xff2200 ) },
-    // };
-    // var shader = new THREE.ShaderMaterial( {
-    //   uniforms: uniforms
-    //   , vertexShader: vertexShader
-    // } );
+    From there Three.js will compile and run your shaders attached to the mesh to which you give that material.
+    It doesn’t get much easier than that really. Well it probably does, but we’re talking about 3D running in your browser so
+    I figure you expect a certain amount of complexity.
+
+    We can actually add two more properties to our MeshShaderMaterial: uniforms and attributes. They can both take vectors,
+    integers or floats but as I mentioned before uniforms are the same for the whole frame, i.e. for all vertices,
+    so they tend to be single values. Attributes, however, are per- vertex variables, so they are expected to be an array.
+    There should be a one- to-one relationship between the number of values in the attributes array and the number of vertices in the mesh.
+
+*/
+
+
 
 
     const buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5}); //  0xcac8d2
+    buildingMaterial.onBeforeCompile = shader => {
+      shader.uniforms.amplitude = { value: 0 };
+      shader.vertexShader = 'uniform float amplitude;\n' + shader.vertexShader;
+      // console.log(shader);
+
+      shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', THREE.ShaderChunk.begin_vertex + '\ntransformed.z = transformed.z*amplitude;\n' )
+      this.materialShader = shader;
+      this.blendIn();
+
+    };
+
     const geometry = new THREE.BufferGeometry();
     geometry.addAttribute( 'position', new THREE.BufferAttribute( data.vertices, 3 ) );
     geometry.addAttribute( 'normal', new THREE.BufferAttribute( data.normal, 3 ) );
     // geometry.addAttribute( 'color', new THREE.BufferAttribute( data.color, 3 ) );
     geometry.addAttribute( 'uv', new THREE.BufferAttribute( data.uv, 2 ) );
-    // geometry.setDrawRange( 0, 10000 )
 
     this.mesh = new THREE.Mesh(geometry, buildingMaterial);
-    // this.mesh = new THREE.Mesh(geometry, shader);
     this.mesh.rotation.x = -Math.PI / 2; // 90 degree
     this.mesh.rotateZ(Math.PI);
     this.mesh.material.side = THREE.DoubleSide;
     this.mesh.position.set(-1*this.pos[0], 1, this.pos[1]);
-
 
     const chunks = 4;
     const posLength = data.vertices.length/3/chunks;
@@ -175,24 +112,20 @@ class DataTile extends Tile {
     // TOOD: first call doesnt need timeout
 
     setTimeout(() =>{
-      geometry.setDrawRange( 0, endPos )
-      start=(posLength*i)+(1*i);
+      geometry.setDrawRange( 0, endPos );
       endPos=(posLength*(i+1))+(1*i);
       map.get().dataTiles.add(this.mesh);
       setTimeout(() =>{
         i++;
-        geometry.setDrawRange( 0, endPos )
-        start=(posLength*i)+(1*i);
+        geometry.setDrawRange( 0, endPos );
         endPos=(posLength*(i+1))+(1*i);
         setTimeout(() =>{
           i++;
           geometry.setDrawRange( 0, endPos )
-          start=(posLength*i)+(1*i);
           endPos=(posLength*(i+1))+(1*i);
           setTimeout(() =>{
             i++;
             geometry.setDrawRange( 0, endPos )
-            start=(posLength*i)+(1*i);
             endPos=(posLength*(i+1))+(1*i);
           }, timeoutTime);
         }, timeoutTime);
@@ -207,10 +140,15 @@ class DataTile extends Tile {
       map.get().dataTiles.add(cubeBox);
     }
 
-    // this.meshes.forEach( e => map.get().dataTiles.add(e))
-
-
     this.state = 'loaded';
+  }
+
+  blendIn(){
+
+    const myVar = setInterval( () => {
+      this.materialShader.uniforms.amplitude.value += 0.02;
+      this.materialShader.uniforms.amplitude.value >= 1 ? clearInterval(myVar): false;
+    }, 20);
 
   }
 
@@ -219,7 +157,6 @@ class DataTile extends Tile {
     const res = 2*Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,OSMB_TILE_ZOOM));
 
     //order minX,maxX,minYmaxY
-
     return [
       this.tileCoords[0]*TILE_SIZE*res-ORIGINSHIFT,
       (this.tileCoords[0]+1)*TILE_SIZE*res-ORIGINSHIFT,
@@ -245,6 +182,7 @@ class DataTile extends Tile {
 
   destroy() {
 
+    console.log(this.state)
     if(this.state === 'loading' || this.state === 'loaded'){
       const waiting = setInterval(() => {
         if (this.state === 'loaded') {
@@ -256,10 +194,91 @@ class DataTile extends Tile {
           clearTimeout(waiting);
         }
       }, 200);
+
     }
   }
 
 }
+
+
+
+// const chunks = 1;
+// const posLength = data.vertices.length/3/chunks;
+// let start=0;
+// let endPos=posLength;
+// let vertices,normal,uv;
+//
+// const mesh = new THREE.Mesh();
+// // const geometry = new THREE.BufferGeometry();
+// const buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5}); //  0xcac8d2
+//
+// console.log(data.uv.length)
+// console.log(data.vertices.length)
+//
+// for(let i = 1; i< chunks+1;i++){
+//   // console.log(i)
+//   console.log(start,endPos)
+//   vertices = data.vertices.slice(start*3,endPos*3);
+//   normal = data.normal.slice(start*3,endPos*3);
+//   uv = data.uv.slice(start*2,endPos*2);
+//   start=(posLength*i)+(1*i);
+//   endPos=(posLength*(i+1))+(1*i)
+//
+//   console.log(vertices.length,normal.length, uv.length)
+//
+//   const geometry = new THREE.BufferGeometry();
+//   geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+//   geometry.addAttribute( 'normal', new THREE.BufferAttribute( normal, 3 ) );
+//   // geometry.addAttribute( 'color', new THREE.BufferAttribute( data.color, 3 ) );
+//   geometry.addAttribute( 'uv', new THREE.BufferAttribute( uv, 2 ) );
+//
+//   const mesh = new THREE.Mesh(geometry, buildingMaterial);
+//   mesh.rotation.x = -Math.PI / 2; // 90 degree
+//   mesh.rotateZ(Math.PI);
+//   mesh.material.side = THREE.DoubleSide;
+//   mesh.position.set(-1*this.pos[0], 1, this.pos[1]);
+//
+//   this.meshes.push(mesh);
+// }
+
+// const chunks = 1;
+// const posLength = data.vertices.length/3/chunks;
+// let start=0;
+// let endPos=posLength;
+// let vertices,normal,uv;
+//
+// const mesh = new THREE.Mesh();
+// // const geometry = new THREE.BufferGeometry();
+// const buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5}); //  0xcac8d2
+//
+// console.log(data.uv.length)
+// console.log(data.vertices.length)
+//
+// for(let i = 1; i< chunks+1;i++){
+//   // console.log(i)
+//   console.log(start,endPos)
+//   vertices = data.vertices.slice(start*3,endPos*3);
+//   normal = data.normal.slice(start*3,endPos*3);
+//   uv = data.uv.slice(start*2,endPos*2);
+//   start=(posLength*i)+(1*i);
+//   endPos=(posLength*(i+1))+(1*i)
+//
+//   console.log(vertices.length,normal.length, uv.length)
+//
+//   const geometry = new THREE.BufferGeometry();
+//   geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+//   geometry.addAttribute( 'normal', new THREE.BufferAttribute( normal, 3 ) );
+//   // geometry.addAttribute( 'color', new THREE.BufferAttribute( data.color, 3 ) );
+//   geometry.addAttribute( 'uv', new THREE.BufferAttribute( uv, 2 ) );
+//
+//   const mesh = new THREE.Mesh(geometry, buildingMaterial);
+//   mesh.rotation.x = -Math.PI / 2; // 90 degree
+//   mesh.rotateZ(Math.PI);
+//   mesh.material.side = THREE.DoubleSide;
+//   mesh.position.set(-1*this.pos[0], 1, this.pos[1]);
+//
+//   this.meshes.push(mesh);
+// }
 
 //
 // destroy() {

@@ -34,7 +34,7 @@ var WEBVR = {
 
 			};
 
-			renderer.vr.setDevice( device );
+			renderer.vr.setDevice( device );			
 
 		}
 
@@ -134,6 +134,7 @@ var WEBVR = {
 		if ( 'xr' in navigator ) {
 
 			var button = document.createElement( 'button' );
+			button.id = 'enter-VR';
 			button.style.display = 'none';
 
 			stylizeElement( button );
@@ -151,6 +152,7 @@ var WEBVR = {
 		} else if ( 'getVRDisplays' in navigator ) {
 
 			var button = document.createElement( 'button' );
+			button.id = 'enter-VR';
 			button.style.display = 'none';
 
 			stylizeElement( button );
@@ -199,6 +201,7 @@ var WEBVR = {
 		} else {
 
 			var message = document.createElement( 'a' );
+			message.id = 'enter-VR';
 			message.href = 'https://webvr.info';
 			message.innerHTML = 'WEBVR NOT SUPPORTED';
 

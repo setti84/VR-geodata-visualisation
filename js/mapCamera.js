@@ -12,6 +12,9 @@ class MapCamera {
     this.camPosOnSurface = new THREE.Vector3();
     this.positionchange = 0;
 
+    this.testi1 = new THREE.Vector3();
+    this.testi2 = new THREE.Vector3();
+
 
   }
 
@@ -26,10 +29,24 @@ class MapCamera {
 
   setPosition (position){
 
+
+
+
+    // this.testi2.copy(map.get().threeCamera.position)
+    // this.testi2.x=this.testi2.x+this.testi1.x*5;
+    // this.testi2.z=this.testi2.z+this.testi1.z*5;
+    // console.log(map.get().threeCamera.position)
+    // console.log(position)
+
+    // map.get().threeCamera.getWorldDirection(this.testi2);
+    // this.testi1.set(map.get().threeCamera.position.x+this.testi2.x*2, map.get().threeCamera.position.y, map.get().threeCamera.position.z+this.testi2.z*2)
+    // console.log(map.get().threeCamera.position)
+    // console.log(this.testi1)
+
     this.camPosOnSurface = position;
 
     // TODO map-scaling here? if we change the scale here we dont change the scale for map tiles, scaling factor from mapApp element
-    // add the new camera Position(or the point where the camera is looking) to the origin and thats where the new camera looking psoition is in LatLng
+    // add the new camera Position(or the point where the camera is looking) to the origin and thats where the new camera looking position is in LatLng
     const coords = LatLng.unprojectWorldCoordinates(this.originMercator[0]+this.camPosOnSurface.x, this.originMercator[1]-this.camPosOnSurface.z);
     this.newLatLng.setCoords(coords[0], coords[1]);
     // map.get().events.emit('MAP_URL_CHANGE', `${this.newLatLng.zoom}/${parseFloat(this.newLatLng.lat).toFixed(6)}/${parseFloat(this.newLatLng.lng).toFixed(6)}`)

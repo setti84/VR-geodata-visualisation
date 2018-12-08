@@ -92,13 +92,25 @@ THREE.MapControls = function ( object, domElement ) {
 	this.setDolly = function (change) {
 		scale = change;
 		scope.update();
-	}
+	};
 
   this.setTilt = function (change) {
-    scale = change;
+    if(change === -1){
+      rotateUp(-2 * Math.PI / 60 * scope.autoRotateSpeed);
+    } else {
+      rotateUp(2 * Math.PI / 60 * scope.autoRotateSpeed);
+    }
     scope.update();
-  }
+  };
 
+  this.setRotation = function (change){
+		if(change === -1){
+      rotateLeft(-2 * Math.PI / 60 * scope.autoRotateSpeed);
+		} else {
+      rotateLeft(2 * Math.PI / 60 * scope.autoRotateSpeed);
+		}
+		scope.update();
+	};
 
 	this.getPolarAngle = function () {
 
@@ -566,7 +578,6 @@ THREE.MapControls = function ( object, domElement ) {
 
     // map.get().events.emit('CAMERA_MOVE', scope.target)
     map.get().events.emit('CAMPOS_ON_SURFACE_MOVE', scope.target);
-
 
 		switch ( event.keyCode ) {
 

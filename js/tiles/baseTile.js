@@ -44,7 +44,7 @@ class BaseTile extends Tile {
       tileCoords: this.tileCoords,
       bounds: this.bounds,
       tileMiddle: this.tileMiddle,
-      link: link,
+      link: link1,
       x: x,
       y: y,
       debugging: map.get().debugging

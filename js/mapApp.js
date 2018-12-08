@@ -5,12 +5,14 @@ class MapApp {
     this.zoom = options.zoom || 18;
     this.position = new LatLng(options.position.lat, options.position.lng, this.zoom) || new LatLng( 52.545, 13.355, this.zoom);
     this.debugging = options.debugging || false;
+    this.vrEnable = false;
     this.tiles = new Tiles(this.position);
     this.threeScene = null;
     this.threeCamera = null;
     this.threeRenderer = null;
     this.initScene();
 
+    this.vrMode = new VrMode();
     this.events = new Events();
     // this.textureManager = new TextureManager();
     this.cam = new MapCamera(this.position, this.threeCamera);
@@ -21,28 +23,38 @@ class MapApp {
     //debugging
     const geometry = new THREE.BoxGeometry( 5, 5, 5 );
     const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    const cube = new THREE.Mesh( geometry, material );
+    this.debuggingCube = new THREE.Mesh( geometry, material );
     if(this.debugging){
       const axesHelper = new THREE.AxesHelper( 150 );
       this.threeScene.add(axesHelper);
-      this.threeScene.add( cube );
+      this.threeScene.add( this.debuggingCube );
     }
 
-    let timer = 0;
+    this.threeRenderer.setAnimationLoop( () =>{
+      this.animationLoop();
+    } );
 
-    this.threeRenderer.setAnimationLoop( () => {
-      // uniforms.amplitude.value = util.clamp(uniforms.amplitude.value+0.01,0,1);
-      if(this.debugging){
-        cube.position.set(this.cam.camPosOnSurface.x, this.cam.camPosOnSurface.y, this.cam.camPosOnSurface.z);
-      }
-      timer=util.clamp(timer+0.01,0,1);
-      this.threeRenderer.render(this.threeScene, this.threeCamera);
-
-    });
     console.log(this.threeRenderer.info)
 
     this.setUrlHash();
 
+  }
+
+  animationLoop(){
+    if(this.vrEnable && this.vrMode.isSelecting){
+      this.vrMode.handleController();
+
+    }
+    //console.log(this.threeRenderer.vr.isPresenting())
+    //console.log(WEBVR);
+    //console.log(this.threeScene);
+    // let timer = 0;
+    // uniforms.amplitude.value = util.clamp(uniforms.amplitude.value+0.01,0,1);
+    if(this.debugging){
+      this.debuggingCube.position.set(this.cam.camPosOnSurface.x, this.cam.camPosOnSurface.y, this.cam.camPosOnSurface.z);
+    }
+    // timer=util.clamp(timer+0.01,0,1);
+    this.threeRenderer.render(this.threeScene, this.threeCamera);
   }
 
   mapOriginChange(){
@@ -65,6 +77,7 @@ class MapApp {
   addEvents() {
 
     this.events.on('MAP_URL_CHANGE', position => {
+      // console.log('map url change')
       window.location.hash = `${position}`;
     });
 
@@ -80,11 +93,49 @@ class MapApp {
       this.controls.setTilt(change);
     });
 
+    this.events.on('MAP_ROTATION_CHANGE', change => {
+      this.controls.setRotation(change);
+    });
+
+    this.events.on('HANDLE_VR', event => {
+      console.log('enter VR mode')
+       if(this.vrEnable){
+        this.vrEnable = false;
+        this.vrMode.end();
+         this.threeRenderer.vr.enabled = false;
+      } else{
+        this.vrEnable = true;
+        this.vrMode.start();
+      }
+    });
+
+    this.events.on('VR_MOVE_CAMERA', change => {
+      this.controls.setRotation(change);
+    });
+
+    this.events.on('VR_MOVE', change => {
+      this.controls.setRotation(change);
+    });
+
     document.getElementById('mapzoom-plus').addEventListener('click', () => this.events.emit('MAP_HEIGHT_CHANGE', 0.8) );
     document.getElementById('mapzoom-minus').addEventListener('click', () => this.events.emit('MAP_HEIGHT_CHANGE', 1.4));
 
-    document.getElementById('maptilt-plus').addEventListener('click', () => this.events.emit('MAP_TILT_CHANGE', 0.8) );
-    document.getElementById('maptilt-minus').addEventListener('click', () => this.events.emit('MAP_TILT_CHANGE', 1.4));
+    document.getElementById('maptilt-up').addEventListener('click', () => this.events.emit('MAP_TILT_CHANGE', 1) );
+    document.getElementById('maptilt-down').addEventListener('click', () => this.events.emit('MAP_TILT_CHANGE', -1));
+
+    document.getElementById('maprotate-counterclock').addEventListener('click', () => this.events.emit('MAP_ROTATION_CHANGE', -1) );
+    document.getElementById('maprotate-clock').addEventListener('click', () => this.events.emit('MAP_ROTATION_CHANGE', 1));
+
+    document.getElementById('enter-VR').addEventListener('click', () => this.events.emit('ENTER_VR'));
+
+    window.addEventListener( 'vrdisplaypresentchange', ( event ) => {
+      this.events.emit('HANDLE_VR', event)
+    }, false );
+
+    // window.addEventListener( 'click', ( event ) => {
+    //
+    // }, false );
+
 
   }
 
@@ -100,7 +151,7 @@ class MapApp {
     document.body.appendChild(this.threeRenderer.domElement);
 
     document.body.appendChild( WEBVR.createButton( this.threeRenderer ) );
-    // this.threeRenderer.vr.enabled = true;
+    //this.threeRenderer.vr.enabled = true;
 
     this.threeCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 15000);
     this.threeCamera.position.set(0, CAMERAHEIGHT, 0);
@@ -162,15 +213,3 @@ class MapApp {
   }
 
 }
-
-/*
-performance
-
-staendige if abfrage ob framrate schlecht ist. Wenn ja dann abschalten von: Schatten, shadows,
-antialiasing, reducing the resolution(setPixelRatio)
-
-https://threejs.org/docs/#api/en/objects/LOD
-
-
-
- */

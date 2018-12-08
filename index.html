@@ -1,75 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
 
-    <title>VR 3D Map Example</title>
-    <meta charset="utf-8">
-    <meta name="description" content="3 D buildings">
-    <meta name="keywords" content="3D, Karte, web mapping, WebVR">
+    <head>
+        <meta charset="utf-8">
+        <title>VR 3D Map Example</title>
+        <meta name="description" content="3D buildings">
+        <meta name="keywords" content="3D, map, Karte, web mapping, VR, WebVR, Beuth">
+        <meta name="author" content="Sebasian Settgast">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/style.css">
 
-    <script src="./js/lib/three.min.js"></script>
-    <script src="./js/lib/webGL.js"></script>
-    <script src="./js/lib/webVR.js"></script>
+        <script src="./js/lib/three.min.js"></script>
+        <script src="./js/lib/webGL.js"></script>
+        <script src="./js/lib/webVR.js"></script>
 
-    <script src="./js/lib/osmtogeojson.js"></script>
+        <script src="./js/constants.js"></script>
+        <script src="./js/util.js"></script>
+        <script src="./js/worker/workerpool.js"></script>
 
-    <script src="./js/constants.js"></script>
-    <script src="./js/util.js"></script>
-    <script src="./js/worker/workerpool.js"></script>
+        <script src="./js/events.js"></script>
+        <script src="./js/textureManager.js"></script>
+        <script src="./js/mapCamera.js"></script>
+        <script src="./js/point/point.js"></script>
+        <script src="./js/point/latLng.js"></script>
+        <script src="./js/MapControls.js"></script>
+        <script src="./js/VrMode.js"></script>
 
-    <script src="./js/events.js"></script>
-    <script src="./js/textureManager.js"></script>
-    <script src="./js/mapCamera.js"></script>
-    <script src="./js/point/point.js"></script>
-    <script src="./js/point/latLng.js"></script>
-    <script src="./js/MapControls.js"></script>
+        <script src="./js/tiles/tiles.js"></script>
+        <script src="./js/tiles/tile.js"></script>
+        <script src="./js/tiles/baseTile.js"></script>
+        <script src="./js/tiles/dataTile.js"></script>
 
-    <script src="js/tiles/tiles.js"></script>
-    <script src="js/tiles/tile.js"></script>
-    <script src="js/tiles/baseTile.js"></script>
-    <script src="js/tiles/dataTile.js"></script>
-
-    <script src="./js/mapApp.js"></script>
+        <script src="./js/mapApp.js"></script>
 
 
 <!--
-    <script type="x-shader/x-vertex" id="vertexShader">
-            uniform float amplitude;
-			varying vec3 vWorldPosition;
-			uniform vec3 color;
-			void main() {
-				vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
-				vWorldPosition = worldPosition.xyz;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-			}
-		</script>
+        <script type="x-shader/x-vertex" id="vertexShader">
+                uniform float amplitude;
+                varying vec3 vWorldPosition;
+                uniform vec3 color;
+                void main() {
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4( position.x, position.y, position.z*amplitude, 1.0 );
+                }
+            </script>
 -->
-</head>
+    </head>
 
+    <body>
 
-<body>
+        <div class="map-button-parent" id="map-button-parent-zoom">
+            <input class="map-button" id="mapzoom-plus" type="button" value="+"/>
+            <br>
+            <input class="map-button" id="mapzoom-minus" type="button" value="-"/>
+        </div>
 
+        <div class="map-button-parent" id="map-button-parent-rotate">
+            <input class="map-button" id="maprotate-counterclock" type="button" value="↺"/>
+            <br>
+            <input class="map-button" id="maprotate-clock" type="button" value="↻"/>
+        </div>
 
-<div class="mapzom-button">
-    <input class="mapzom-button-plus-minus" id="mapzoom-plus" type="button" value="+"/>
-    <br>
-    <input class="mapzom-button-plus-minus" id="mapzoom-minus" type="button" value="-"/>
-</div>
+        <div class="map-button-parent" id="map-button-parent-tilt">
+            <input class="map-button" id="maptilt-up" type="button" value="⇑"/>
+            <br>
+            <input class="map-button" id="maptilt-down" type="button" value="⇓"/>
+        </div>
 
-<div class="maptilt-button">
-    <input class="maptilt-button-plus-minus" id="maptilt-plus" type="button" value="+"/>
-    <br>
-    <input class="maptilt-button-plus-minus" id="maptilt-minus" type="button" value="-"/>
-</div>
+        <div id="text"></div>
 
+    </body>
 
-<div id="text"></div>
-
-</body>
-
-<script src="./js/logic.js"></script>
-
+        <script src="./js/logic.js"></script>
 
 </html>

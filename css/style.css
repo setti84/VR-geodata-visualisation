@@ -22,33 +22,28 @@ body {
     padding: 10px;
 }
 
-.mapzom-button {
+.map-button-parent {
   position: absolute;
   bottom: 20px;
-  left: 20px;
   background: linen;
   border-radius: 5px;
   z-index: 1;
   padding: 5px;
 }
 
-.mapzom-button-plus-minus {
-  cursor: pointer;
-  height: 40px;
-  width: 40px;
+#map-button-parent-zoom {
+  left: 10px;
 }
 
-.maptilt-button {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background: linen;
-  border-radius: 5px;
-  z-index: 1;
-  padding: 5px;
+#map-button-parent-rotate {
+  left: 60px;
 }
 
-.maptilt-button-plus-minus {
+#map-button-parent-tilt {
+  left: 110px;
+}
+
+.map-button {
   cursor: pointer;
   height: 40px;
   width: 40px;
