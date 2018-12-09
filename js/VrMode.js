@@ -8,7 +8,6 @@ class VrMode {
     this.facingDirection = new THREE.Vector3();
     this.rig = new THREE.Object3D();
 
-
   }
 
   handleController(){
@@ -51,8 +50,8 @@ class VrMode {
 
     map.get().threeRenderer.vr.enabled = true;
     console.log(map.get().threeRenderer.vr.getController( 0 ))
-    // this.controller1.addEventListener( 'selectstart', () => this.isSelecting = true );
-    // this.controller1.addEventListener( 'selectend',   () => this.isSelecting = false );
+    this.controller1.addEventListener( 'selectstart', () => this.isSelecting = true );
+    this.controller1.addEventListener( 'selectend',   () => this.isSelecting = false );
     // this.controller1.addEventListener( 'selectstart', this.selectStart );
     // this.controller1.addEventListener( 'selectend',   this.selectEnd );
 

@@ -54,7 +54,7 @@ class Tiles {
     //adds new tiles to the pool. For this a for-sign(plus or minus) matrix is calculated from which the new tiles are generated.
     //for the key of the maptiles the numbers consist of a leading number(1 = basemap tile, 2 = datatile) and the tilenumber.
 
-    const calculateTileDistance = 1;
+    const calculateTileDistance = 9;
     let tileIncrement = Math.floor(calculateTileDistance / 2);
     const curTileOSMB = position.OSMBmerc2Tile();
 

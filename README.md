@@ -16,7 +16,7 @@ Beuth university in Winter 2018.
 * shadows
 * evaluate properties of datasources like colors, min building heights
 * new datasources (mapbox)
-* sky(move sphere around camera https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_lightmap.html)
+* sky(move sphere around camera https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_lightmap.html) ... done!
 * animations (skeleton, chicken, birds,...?)
 * elevation
 
@@ -31,7 +31,7 @@ Beuth university in Winter 2018.
 
 ### Buildings:
 
-* color (pass building color to shader)
+* color (pass building color to shader) ...done!
 * roofs?
 * stone
 * glass

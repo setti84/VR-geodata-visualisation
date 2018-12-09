@@ -7,9 +7,11 @@ class MapApp {
     this.debugging = options.debugging || false;
     this.vrEnable = false;
     this.tiles = new Tiles(this.position);
+    // this.threeSky = null;
     this.threeScene = null;
     this.threeCamera = null;
     this.threeRenderer = null;
+    this.threeLight = {};
     this.initScene();
 
     this.vrMode = new VrMode();
@@ -34,7 +36,7 @@ class MapApp {
       this.animationLoop();
     } );
 
-    console.log(this.threeRenderer.info)
+    console.log(this.threeRenderer.info);
 
     this.setUrlHash();
 
@@ -43,17 +45,13 @@ class MapApp {
   animationLoop(){
     if(this.vrEnable && this.vrMode.isSelecting){
       this.vrMode.handleController();
-
     }
-    //console.log(this.threeRenderer.vr.isPresenting())
-    //console.log(WEBVR);
-    //console.log(this.threeScene);
-    // let timer = 0;
-    // uniforms.amplitude.value = util.clamp(uniforms.amplitude.value+0.01,0,1);
+
+    // this.threeLight.pointLight.position.set(this.threeCamera.position.x, this.threeCamera.position.y, this.threeCamera.position.z)
+
     if(this.debugging){
       this.debuggingCube.position.set(this.cam.camPosOnSurface.x, this.cam.camPosOnSurface.y, this.cam.camPosOnSurface.z);
     }
-    // timer=util.clamp(timer+0.01,0,1);
     this.threeRenderer.render(this.threeScene, this.threeCamera);
   }
 
@@ -164,23 +162,68 @@ class MapApp {
     this.controls.maxPolarAngle = 1.2;
 
 
+    // https://threejs.org/examples/?q=sky#webgl_shaders_sky
+    const phi = 2 * Math.PI * ( 0.25 - 0.5 ); // azimuth
+    const theta = Math.PI * ( 0.453 - 0.5 ); // inclination
+    const sunPos = new THREE.Vector3(400000* Math.cos( phi ), 400000* Math.sin( phi ) * Math.sin( theta ),400000 * Math.sin( phi )* Math.cos( theta ))
+
+    const sky = new THREE.Sky();
+    sky.scale.setScalar( 450000 );
+    this.threeScene.add( sky );
+
+    sky.onBeforeCompile = shader => {
+      shader.uniforms.sunPosition = { value: sunPos };
+    };
+
+    sky.material.uniforms.sunPosition.value.set(sunPos.x, sunPos.y, sunPos.z)
+
+    // Add Sun Helper
+    const sunSphere = new THREE.Mesh(
+      new THREE.SphereBufferGeometry( 30, 16, 8 ),
+      new THREE.MeshBasicMaterial( { color: 0xffffff } )
+    );
+    sunSphere.position.set(sunPos.x, sunPos.y, sunPos.z);
+
+    sunSphere.visible = true;
+    this.threeScene.add( sunSphere );
+
     // lights
+    // 0xffffff kind of white
+    // 0xff0000 kind of red
 
-    // light needs to walk with the camera
-    // var light = new THREE.PointLight( 0xffffff, 1, 1800 );
-    // light.position.set( 0,150, 0 );
-    // this.threeScene.add( light );
+    this.threeLight.pointLight = new THREE.PointLight( 0xffffff , 0.2);
+    this.threeLight.pointLight.position.set( 0,150, 0 );
+    this.threeScene.add( this.threeLight.pointLight );
 
-    var light = new THREE.DirectionalLight(0xffffff);
-    light.position.set(1, 1, 1);
-    this.threeScene.add(light);
+    this.threeLight.directionalLight1 = new THREE.DirectionalLight(0xffffff,0.5);
+    this.threeLight.directionalLight1.position.set(1, 1, 1);
+    this.threeScene.add(this.threeLight.directionalLight1);
 
-    var light = new THREE.DirectionalLight(0xffffff);
-    light.position.set(-1, -1, -1);
-    this.threeScene.add(light);
+    this.threeLight.directionalLight2 = new THREE.DirectionalLight(0xffffff,0.5);
+    this.threeLight.directionalLight2.position.set(-1, -1, -1);
+    this.threeScene.add(this.threeLight.directionalLight2);
 
-    var light = new THREE.AmbientLight(0x222222);
-    this.threeScene.add(light);
+    if(this.debugging){
+
+      if(this.threeLight.pointLight){
+        const pointLightHelper = new THREE.PointLightHelper( this.threeLight.pointLight, 30 ); // second value size sphere as lightbulb
+        this.threeScene.add( pointLightHelper );
+      }
+
+      if(this.threeLight.directionalLight1){
+        const helper = new THREE.DirectionalLightHelper( this.threeLight.directionalLight1, 150 );
+        this.threeScene.add( helper );
+      }
+
+      if(this.threeLight.directionalLight2){
+        const helper2 = new THREE.DirectionalLightHelper( this.threeLight.directionalLight2, 150 );
+        this.threeScene.add( helper2 );
+      }
+
+    }
+
+    this.threeLight.ambientLight = new THREE.AmbientLight(0x404040 ); // 0x222222
+    this.threeScene.add(this.threeLight.ambientLight);
 
     window.addEventListener('resize', () => {
       this.threeCamera.aspect = window.innerWidth / window.innerHeight;

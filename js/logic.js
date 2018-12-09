@@ -6,25 +6,19 @@ const init = () => {
     document.body.appendChild( WEBGL.getWebGLErrorMessage() );
   }
 
-// new LatLng( 52.54591075494661, 13.355914950370789, 18 ); {lat: 52.54591075494661, lng: 13.355914950370789}   //Berlin beuth
-// {lat: 40.72372, lng: -73.98922};   // New York
-// new LatLng(1.29422,103.85411);        // Singapore
-// new LatLng(0,0);
+//   {lat: 52.54591, lng: 13.35591}   //Berlin beuth
+//   {lat: 40.72372, lng: -73.98922}   New York
+//   {lat:1.29422, lng: 103.85411}     Singapore
+//   {lat:-46.63604, lng: -23.54887}   Sao Paulo
+//   {lat: 52.54081, lng: 12.994}      Elstal
 
   map = new MapApp({
-    zoom: 15,
-    position: {lat:40.714126602154664, lng: -74.0062665939331}, //  {lat:40.714126602154664, lng: -74.0062665939331}  {lat: 52.54591075494661, lng: 13.355914950370789}
+    zoom: 16,
+    position: {lat: 52.5459, lng: 13.35591} ,
     debugging: false,
   });
 
-  // map.addEvents();
-
   map.addTiles({mapTiles: 'mapbox', dataTiles: 'buildings'});
-
-  // map.get().threeRenderer.setAnimationLoop( () => {
-  //   console.log('render')
-  //   map.get().threeRenderer.render(map.get().threeScene, map.get().threeCamera);
-  // } );
 
   const addStats = () => {
     javascript:(function () {
@@ -60,20 +54,3 @@ const changeCoordinatesDisplay = (cam) => {
     + "New Pos in Tile: " + cam.newLatLng.googleTiles() + "\n ";
 
 }
-
-
-//
-// setTimeout( () => {
-//
-//   const allObjects = document.querySelector('a-scene').object3D.children;
-//
-//   allObjects.forEach( e => {
-//     if(e.type === 'Group' ) {
-//       if(e.name === 'buildings' || e.name === 'basemap') {
-//         e.position.set(e.position.x*SCALEFACTOR,e.position.y*SCALEFACTOR , e.position.z*SCALEFACTOR);
-//         e.scale.set(e.scale.x*SCALEFACTOR,  e.scale.y, e.scale.z*SCALEFACTOR ,);
-//       }
-//     }
-//   });
-//
-// },4000);

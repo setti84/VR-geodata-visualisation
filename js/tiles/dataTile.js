@@ -8,7 +8,8 @@ class DataTile extends Tile {
     this.calculateDistanceToOrigin(origin);
     this.meshes = [];
     this.amplitude = 0.1;
-    this.materialshader;
+    this.materialShader = null;
+    this.buildingMaterial = null;
 
     //   TODO: order objects in categories (buildings,trees,...)
     //   TODO: add texture to objects (option to turn it on and off)
@@ -72,12 +73,23 @@ class DataTile extends Tile {
     There should be a one- to-one relationship between the number of values in the attributes array and the number of vertices in the mesh.
 
 */
+    const geometry = new THREE.BufferGeometry();
+    geometry.addAttribute( 'position', new THREE.BufferAttribute( data.vertices, 3 ) );
+    geometry.addAttribute( 'normal', new THREE.BufferAttribute( data.normal, 3 ) );
+    geometry.addAttribute( 'color', new THREE.BufferAttribute( data.color, 3 , true) );
+    // console.log(geometry)
 
+    // this.buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5}); // blue: 0x56a0c5 0xcac8d2 gray: fcfdfd color: 0xFFFFFF,
+    this.buildingMaterial = new THREE.MeshLambertMaterial({  vertexColors: THREE.VertexColors});
+     //{  vertexColors: THREE.VertexColors}
+    // this.buildingMaterial = new THREE.MeshStandardMaterial({color: 0x56a0c5}); //  0xcac8d2
+    // this.buildingMaterial = new THREE.MeshBasicMaterial({color: 0x56a0c5}); //  0xcac8d2
+    // this.buildingMaterial = new THREE.MeshPhysicalMaterial({color: 0x56a0c5}); //  0xcac8d2
 
+    this.buildingMaterial.transparent = true;
+    this.buildingMaterial.opacity = 0;
 
-
-    const buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5}); //  0xcac8d2
-    buildingMaterial.onBeforeCompile = shader => {
+    this.buildingMaterial.onBeforeCompile = shader => {
       shader.uniforms.amplitude = { value: 0 };
       shader.vertexShader = 'uniform float amplitude;\n' + shader.vertexShader;
       // console.log(shader);
@@ -85,16 +97,15 @@ class DataTile extends Tile {
       shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', THREE.ShaderChunk.begin_vertex + '\ntransformed.z = transformed.z*amplitude;\n' )
       this.materialShader = shader;
       this.blendIn();
+      // console.log(shader)
 
     };
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.addAttribute( 'position', new THREE.BufferAttribute( data.vertices, 3 ) );
-    geometry.addAttribute( 'normal', new THREE.BufferAttribute( data.normal, 3 ) );
-    // geometry.addAttribute( 'color', new THREE.BufferAttribute( data.color, 3 ) );
-    geometry.addAttribute( 'uv', new THREE.BufferAttribute( data.uv, 2 ) );
+    // console.log(this.buildingMaterial)
 
-    this.mesh = new THREE.Mesh(geometry, buildingMaterial);
+    // this.mesh = new THREE.Mesh(geometry, {vertexColors: THREE.FaceColors}); //this.buildingMaterial   {vertexColors: THREE.VertexColors}
+    this.mesh = new THREE.Mesh(geometry);
+    this.mesh = new THREE.Mesh(geometry, this.buildingMaterial);
     this.mesh.rotation.x = -Math.PI / 2; // 90 degree
     this.mesh.rotateZ(Math.PI);
     this.mesh.material.side = THREE.DoubleSide;
@@ -111,6 +122,7 @@ class DataTile extends Tile {
     // TODO cancel all timeouts on destroy
     // TOOD: first call doesnt need timeout
 
+    // map.get().dataTiles.add(this.mesh);
     setTimeout(() =>{
       geometry.setDrawRange( 0, endPos );
       endPos=(posLength*(i+1))+(1*i);
@@ -145,9 +157,18 @@ class DataTile extends Tile {
 
   blendIn(){
 
-    const myVar = setInterval( () => {
+    const height = setInterval( () => {
+
       this.materialShader.uniforms.amplitude.value += 0.02;
-      this.materialShader.uniforms.amplitude.value >= 1 ? clearInterval(myVar): false;
+      this.materialShader.uniforms.amplitude.value >= 1 ? clearInterval(height): false;
+
+    }, 20);
+
+    const opacity = setInterval( () => {
+
+      this.buildingMaterial.opacity += 0.05;
+      this.buildingMaterial.opacity >= 1 ? clearInterval(opacity): false;
+
     }, 20);
 
   }
@@ -182,7 +203,6 @@ class DataTile extends Tile {
 
   destroy() {
 
-    console.log(this.state)
     if(this.state === 'loading' || this.state === 'loaded'){
       const waiting = setInterval(() => {
         if (this.state === 'loaded') {

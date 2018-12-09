@@ -44,7 +44,7 @@ class BaseTile extends Tile {
       tileCoords: this.tileCoords,
       bounds: this.bounds,
       tileMiddle: this.tileMiddle,
-      link: link1,
+      link: link,
       x: x,
       y: y,
       debugging: map.get().debugging
@@ -73,16 +73,13 @@ class BaseTile extends Tile {
     geometry.addAttribute( 'color', new THREE.BufferAttribute( data.color, 3 ) );
     geometry.addAttribute( 'uv', new THREE.BufferAttribute( data.uv, 2 ) );
 
-    this.mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({map: this.texture}));
+    this.mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({map: this.texture })); // vertexColors: THREE.VertexColors
     this.mesh.rotation.x = -Math.PI / 2; // 90 degree
     this.mesh.position.set(-1 * tile.pos[0], 0, tile.pos[1]);
-    // console.log(tile.pos)
 
     map.get().mapTiles.add(this.mesh);
     this.state = 'loaded';
   }
-
-
 
   calculateDistanceToOrigin(newCameraPos) {
     // Pythagorean theorem to get the distance to the camera
