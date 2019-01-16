@@ -19,6 +19,13 @@ Beuth university in Winter 2018.
 * sky(move sphere around camera https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_lightmap.html) ... done!
 * animations (skeleton, chicken, birds,...?)
 * elevation
+* lower framerate on map idle
+* tile loading
+    * view polygon instead of radius around camera for tile loading
+    * only add new tile data(building data) when not paning or moving camera
+    * bigger radius(polygon) for maptiles than for buildings
+    * different array for different tiles?
+    * loading basemaptiles on paning but not building tiles
 
 ## Model Objects 
 
@@ -33,10 +40,22 @@ Beuth university in Winter 2018.
 
 * color (pass building color to shader) ...done!
 * roofs?
-* stone
-* glass
-* metal
-* wood
+* OSMB list from material from Jan
+    * glass
+    * concrete
+    * metal
+    * brick
+    * plaster
+* OSM (order of apperance on taginfo) building:material https://wiki.openstreetmap.org/wiki/Key:building:material
+    * cement_block
+    * brick
+    * plaster
+    * wood
+    * concrete
+    * metal
+    * stone
+    * steel
+    * glass
 
 ### Landuse:
 

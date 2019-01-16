@@ -8,51 +8,122 @@ class MapCamera {
     this.originlatLon = latLng;
     this.originMercator = this.originlatLon.wgs2Mercator();
     this.newLatLng = new LatLng(latLng.lat, latLng.lng, latLng.zoom);
-
     this.camPosOnSurface = new THREE.Vector3();
-    this.positionchange = 0;
 
-    this.testi1 = new THREE.Vector3();
-    this.testi2 = new THREE.Vector3();
-
+    this.raycaster = new THREE.Raycaster();
+    this.raycaster.far = CAMERA_MAX_FAR;
+    this.raycaster.near = CAMERA_NEAR;
+    this.raycasterIsBusy = false;
+    // upper left , upper right, lower right, lower left of screen
+    this.rayCasterPoints = [new THREE.Vector2(-1,1), new THREE.Vector2(1,1), new THREE.Vector2(1,-1), new THREE.Vector2(-1,-1)];
+    this.frustumPolygon = [{x:0,z:0}, {x:0,z:0}, {x:0,z:0}, {x:0,z:0}];
+    this.frustumMaxDistance = CAMERA_MAX_FAR;
 
   }
 
-  getPosition(){
-    return this.threeCamera.getWorldPosition();
+  updateRaycaster (){
+    // updates the polygon used for tile loading by getting coordinates from intersection
+    // of screen with ground material. Result are world coordinates we can use to know if we need new maptiles.
+
+    if(this.raycasterIsBusy) return;
+    this.raycasterIsBusy = true;
+
+    const frame = map.get().raycastFrame;
+
+    // empty array with coordinates for new run
+    // this.frustumPolygon.length = 0;
+
+    let pos = [];
+    this.rayCasterPoints.forEach( (e, i) => {
+
+      this.raycaster.setFromCamera(e, this.threeCamera);
+      pos = this.raycaster.intersectObjects([map.get().raycastFrame]);
+      // console.log(pos)
+
+      if(pos.length === 0) return;
+
+      this.frustumPolygon.splice( i, 1, {
+        x: util.clamp( Math.round( pos[0].point.x - map.get().cam.camPosOnSurface.x) , -this.frustumMaxDistance,this.frustumMaxDistance),
+        z: util.clamp(Math.round( pos[0].point.z - map.get().cam.camPosOnSurface.z), -this.frustumMaxDistance,this.frustumMaxDistance)
+        // x: util.clamp( Math.round( pos[0].point.x - map.get().threeCamera.position.x) , -this.frustumMaxDistance,this.frustumMaxDistance),
+        // z: util.clamp(Math.round( pos[0].point.z - map.get().threeCamera.position.z), -this.frustumMaxDistance,this.frustumMaxDistance)
+        // x:   pos[0].point.x ,
+        // z:  pos[0].point.z
+        });
+
+    });
+
+
+
+
+    // this.rayCasterPoints.forEach( (e) => {
+    //   this.raycaster.setFromCamera(e, this.threeCamera);
+    //   pos = this.raycaster.intersectObjects([map.get().raycastFrame]);
+    //   if(pos.length === 0) {
+    //     console.log('recall')
+    //     this.updateRaycaster();
+    //     return;
+    //   } else {
+    //     this.frustumPolygon.push({
+    //       // x: util.clamp( Math.round( pos[0].point.x - map.get().threeCamera.position.x ) , -this.frustumMaxDistance , this.frustumMaxDistance ) ,
+    //       // z: util.clamp( Math.round( pos[0].point.z - map.get().threeCamera.position.z ) , -this.frustumMaxDistance , this.frustumMaxDistance )
+    //       // x: Math.round( pos[0].point.x - map.get().threeCamera.position.x ) ,
+    //       // z: Math.round( pos[0].point.z - map.get().threeCamera.position.z )
+    //       x: pos[0].point.x ,
+    //       z: pos[0].point.z
+    //     });
+    //   }
+    // });
+
+    if(map.get().status.debugging){
+      const ecke = 0;
+      //change first number in array to chose different point
+
+      map.get().debugging.camCube.position.set(this.frustumPolygon[ecke].x + map.get().cam.camPosOnSurface.x, 100, this.frustumPolygon[ecke].z+map.get().cam.camPosOnSurface.z)
+
+    }
+
+    this.raycasterIsBusy = false;
+
+    map.get().tiles.update(map.get().cam.newLatLng);
+
   }
-
-  // addMovementWatcher () {
-  //   this.movementWatcher = new MovementWatcher(this.originlatLon, this.newLatLng);
-  // }
-
 
   setPosition (position){
 
+    const coords = LatLng.unprojectWorldCoordinates(this.originMercator[0]+position.x, this.originMercator[1]-position.z);
+    if(coords[0] < -80 || coords[0] > 80 || coords[1] < -180 || coords[1] > 180) {
+      // set map back to old coords
 
-
-
-    // this.testi2.copy(map.get().threeCamera.position)
-    // this.testi2.x=this.testi2.x+this.testi1.x*5;
-    // this.testi2.z=this.testi2.z+this.testi1.z*5;
-    // console.log(map.get().threeCamera.position)
-    // console.log(position)
-
-    // map.get().threeCamera.getWorldDirection(this.testi2);
-    // this.testi1.set(map.get().threeCamera.position.x+this.testi2.x*2, map.get().threeCamera.position.y, map.get().threeCamera.position.z+this.testi2.z*2)
-    // console.log(map.get().threeCamera.position)
-    // console.log(this.testi1)
-
+      // map.get().setPosition(this.newLatLng.lat, this.newLatLng.lng)
+      // console.log(this.newLatLng.lat, this.newLatLng.lng)
+      return;
+    }
     this.camPosOnSurface = position;
+    this.newLatLng.setCoords(coords[0], coords[1]);
+
+
+    // this.camPosOnSurface = position;
+    // const coords = LatLng.unprojectWorldCoordinates(this.originMercator[0]+this.camPosOnSurface.x, this.originMercator[1]-this.camPosOnSurface.z);
+    // if(coords[0] < -80 || coords[0] > 80 || coords[1] < -180 || coords[1] > 180) {
+    //   // set map back to old coords
+    //   console.log('bei return')
+    //   return;
+    // }
+    // this.newLatLng.setCoords(coords[0], coords[1]);
+
+    // console.log(this.originlatLon)
+    // console.log(map.get().threeCamera.position)
+
+    // console.log(this.camPosOnSurface.x, this.camPosOnSurface.z)
+    // map.get().events.emit('MAP_URL_CHANGE', `${this.newLatLng.zoom}/${parseFloat(this.newLatLng.lat).toFixed(6)}/${parseFloat(this.newLatLng.lng).toFixed(6)}`)
+    // console.log(this.originlatLon)
+
+    // map.get().tiles.update(this.newLatLng);
+
 
     // TODO map-scaling here? if we change the scale here we dont change the scale for map tiles, scaling factor from mapApp element
-    // add the new camera Position(or the point where the camera is looking) to the origin and thats where the new camera looking position is in LatLng
-    const coords = LatLng.unprojectWorldCoordinates(this.originMercator[0]+this.camPosOnSurface.x, this.originMercator[1]-this.camPosOnSurface.z);
-    this.newLatLng.setCoords(coords[0], coords[1]);
-    // map.get().events.emit('MAP_URL_CHANGE', `${this.newLatLng.zoom}/${parseFloat(this.newLatLng.lat).toFixed(6)}/${parseFloat(this.newLatLng.lng).toFixed(6)}`)
-    // console.log(this.newLatLng)
-    map.get().tiles.update(this.newLatLng);
-    // changeCoordinatesDisplay(this);
+    // add the new camera Position(or the point where the camera is looking at) to the origin and thats where the new camera looking position is in LatLng
 
   }
 

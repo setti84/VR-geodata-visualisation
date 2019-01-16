@@ -31,6 +31,10 @@ THREE.MapControls = function ( object, domElement ) {
 	this.minDistance = 0;
 	this.maxDistance = Infinity;
 
+  // How far you can move in x and z direction(aka lon lat)
+  this.xMaxDistance = 20000000;
+  this.zMaxDistance = 20000000;
+
 	// How far you can zoom in and out ( OrthographicCamera only )
 	this.minZoom = 0;
 	this.maxZoom = Infinity;
@@ -85,13 +89,18 @@ THREE.MapControls = function ( object, domElement ) {
 	this.position0 = this.object.position.clone();
 	this.zoom0 = this.object.zoom;
 
+	// fake event
+	this.fakeEvent = {};
+
 	//
 	// public methods
 	//
 
 	this.setDolly = function (change) {
-		scale = change;
-		scope.update();
+		// scale = change;
+		// scope.update();
+    this.fakeEvent.deltaY = change;
+    onMouseWheel(this.fakeEvent);
 	};
 
   this.setTilt = function (change) {
@@ -111,6 +120,16 @@ THREE.MapControls = function ( object, domElement ) {
 		}
 		scope.update();
 	};
+
+  this.moveMap = function (delta){  // {x:0,y:0,z:0}
+		// console.log(map.get().cam.camPosOnSurface);
+    // console.log(delta);
+    // console.log(delta.sub(map.get().cam.camPosOnSurface));
+
+    panOffset.add( new THREE.Vector3(  map.get().cam.camPosOnSurface.x*-1+ delta.x ,0 , map.get().cam.camPosOnSurface.z*-1+ delta.z));
+
+    scope.update();
+  };
 
 	this.getPolarAngle = function () {
 
@@ -150,8 +169,6 @@ THREE.MapControls = function ( object, domElement ) {
 	// this method is exposed, but perhaps it would be better if we can make it private...
 	this.update = function () {
 
-
-
 		var offset = new THREE.Vector3();
 
 		// so camera.up is the orbit axis
@@ -164,6 +181,10 @@ THREE.MapControls = function ( object, domElement ) {
 		return function update() {
 
 			var position = scope.object.position;
+
+      // console.log(position)
+      // console.log(scope.target)
+      // console.log('-----')
 
 			offset.copy( position ).sub( scope.target );
 
@@ -196,9 +217,11 @@ THREE.MapControls = function ( object, domElement ) {
 			spherical.radius = Math.max( scope.minDistance, Math.min( scope.maxDistance, spherical.radius ) );
 
 			// move target to panned location
-			scope.target.add( panOffset );
+      scope.target.add( panOffset );
+      scope.target.x = util.clamp(scope.target.x, this.xMaxDistance*-1,this.xMaxDistance);
+      scope.target.z = util.clamp(scope.target.z, this.zMaxDistance*-1,this.zMaxDistance)
 
-			offset.setFromSpherical( spherical );
+      offset.setFromSpherical( spherical );
 
 			// rotate offset back to "camera-up-vector-is-up" space
 			offset.applyQuaternion( quatInverse );
@@ -512,7 +535,7 @@ THREE.MapControls = function ( object, domElement ) {
 
 	function handleMouseMoveDolly( event ) {
 
-		//console.log( 'handleMouseMoveDolly' );
+		// console.log( 'handleMouseMoveDolly' );
 
 		dollyEnd.set( event.clientX, event.clientY );
 
@@ -574,10 +597,10 @@ THREE.MapControls = function ( object, domElement ) {
 
 	function handleKeyDown( event ) {
 
-		//console.log( 'handleKeyDown' );
+		// console.log( 'handleKeyDown' );
 
-    // map.get().events.emit('CAMERA_MOVE', scope.target)
     map.get().events.emit('CAMPOS_ON_SURFACE_MOVE', scope.target);
+    map.get().events.emit('CAM_VIEW_CHANGE');
 
 		switch ( event.keyCode ) {
 
@@ -799,6 +822,8 @@ THREE.MapControls = function ( object, domElement ) {
 
 		event.preventDefault();
 
+    map.get().events.emit('MAP_STATUS_BUSY', 'moving');
+
 		switch ( event.button ) {
 
 			case scope.mouseButtons.LEFT:
@@ -862,6 +887,8 @@ THREE.MapControls = function ( object, domElement ) {
 
 		event.preventDefault();
 
+    map.get().events.emit('CAM_VIEW_CHANGE');
+
     // map.get().events.emit('CAMERA_MOVE', scope.target);
 
 		switch ( state ) {
@@ -898,7 +925,10 @@ THREE.MapControls = function ( object, domElement ) {
 
 	function onMouseUp( event ) {
 
+    // TODO: replace MAP_URL_CHANGE with MAP_STATUS_BUSY
     map.get().events.emit('MAP_URL_CHANGE', `${map.get().cam.newLatLng.zoom}/${parseFloat(map.get().cam.newLatLng.lat).toFixed(6)}/${parseFloat(map.get().cam.newLatLng.lng).toFixed(6)}`);
+    map.get().events.emit('MAP_STATUS_BUSY', 'idle');
+
 
 		if ( scope.enabled === false ) return;
 
@@ -917,10 +947,19 @@ THREE.MapControls = function ( object, domElement ) {
 
 		if ( scope.enabled === false || scope.enableZoom === false || ( state !== STATE.NONE && state !== STATE.ROTATE ) ) return;
 
+    map.get().events.emit('MAP_STATUS_BUSY', 'moving');
+    // timeout fakes end of mousewheel use
+    setTimeout( () => {
+      map.get().events.emit('MAP_STATUS_BUSY', 'idle');
+      map.get().events.emit('CAM_VIEW_CHANGE');
+    },50);
 
+    map.get().events.emit('MAP_ZOOM_CHANGE', (event));
 
-		event.preventDefault();
-		event.stopPropagation();
+    if(event.preventDefault){
+      event.preventDefault();
+      event.stopPropagation();
+		}
 
 		scope.dispatchEvent( startEvent );
 
@@ -934,6 +973,12 @@ THREE.MapControls = function ( object, domElement ) {
 
 		if ( scope.enabled === false || scope.enableKeys === false || scope.enablePan === false ) return;
 
+    map.get().events.emit('MAP_STATUS_BUSY', 'moving');
+    // timeout fakes end of Key use
+    setTimeout( () => {
+      map.get().events.emit('MAP_STATUS_BUSY', 'idle');
+    },50);
+
 		handleKeyDown( event );
 
 	}
@@ -943,6 +988,8 @@ THREE.MapControls = function ( object, domElement ) {
 		if ( scope.enabled === false ) return;
 
 		event.preventDefault();
+
+    map.get().events.emit('MAP_STATUS_BUSY', 'moving');
 
 		switch ( event.touches.length ) {
 
@@ -1030,6 +1077,8 @@ THREE.MapControls = function ( object, domElement ) {
 		if ( scope.enabled === false ) return;
 
     map.get().events.emit('MAP_URL_CHANGE', `${map.get().cam.newLatLng.zoom}/${parseFloat(map.get().cam.newLatLng.lat).toFixed(6)}/${parseFloat(map.get().cam.newLatLng.lng).toFixed(6)}`);
+
+    map.get().events.emit('MAP_STATUS_BUSY', 'idle');
 
     handleTouchEnd( event );
 

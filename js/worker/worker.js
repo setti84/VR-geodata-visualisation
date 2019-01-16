@@ -21,6 +21,8 @@ const loadData = (link, type, callback) => {
 
       } else {
         console.log('There was a problem with the request.');
+        // console.log(link);
+        // console.log(httpRequest.readyState)
       }
     }
 
@@ -61,6 +63,16 @@ createBaseTile = (data) => {
 
     bufferGeometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
 
+	/*
+	normals show the facing direction of a vertex.
+ 	Things that are facing forward have the normal 0, 0, 1. Things that are facing away are 0, 0, -1. 
+	Facing left is -1, 0, 0, Facing right is 1, 0, 0. Up is 0, 1, 0 and down is 0, -1, 0.
+	I think the number discribe the x,y,z axis with the corosponding amount the vertex is facing this axis.
+	Example:
+	top side of a cube has normals: 0,1,0
+	bottom side of a cube has normals: 0,1,0
+	*/
+	// wrong?
     var normal = new Float32Array( [
       0, 0, 1,
       0, 0, 1,
@@ -128,9 +140,36 @@ createBaseTile = (data) => {
 const createBuilding = (feature, origin, buildingHeight, buildingCol) =>{
 
   // TODO: solve this problem in a better way, height of building is very uneven compared to reality
-  let buildingFootprint,
-    oRingElement = [];
+
   const tags = feature.properties;
+
+  const createBuildingGeometry = (geometry, height) => {
+
+    let buildingFootprint, oRingElement = [];
+
+    geometry.coordinates.forEach((ring, index) => {
+
+      if (index === 0) {
+        oRingElement = ring.map(x => {
+
+          return new THREE.Vector2( origin[0] - wgs2MercX(x[0]), (origin[1] - wgs2MercY(x[1])));
+        });
+        buildingFootprint = new THREE.Shape(oRingElement);
+      } else {
+        // these all are the inner rings of the polygon and therefore holes
+        buildingFootprint.holes.push(new THREE.Path(ring.map(x => {
+          return new THREE.Vector2( origin[0] - wgs2MercX(x[0]), (origin[1] - wgs2MercY(x[1])))
+        })));
+      }
+
+    });
+
+    return new THREE.ExtrudeBufferGeometry(buildingFootprint, {
+      depth: height,
+      bevelEnabled: false
+    });
+
+  }
 
   // if(tags.material){
   //   console.log(`material: ${tags.material}`)
@@ -142,10 +181,11 @@ const createBuilding = (feature, origin, buildingHeight, buildingCol) =>{
   // console.log(tags)
 
   if (tags.hasOwnProperty('levels')) {
-    buildingHeight = tags['levels']*3;
+    buildingHeight = tags['levels']*4;
   }
   if (tags.hasOwnProperty('height')) {
-    buildingHeight = tags['height']*2;
+    // console.log(tags['height'])
+    buildingHeight = tags['height'];
   }
   if (tags.hasOwnProperty('color')) {
     // console.log(`color: ${tags.color}`)
@@ -157,70 +197,19 @@ const createBuilding = (feature, origin, buildingHeight, buildingCol) =>{
     } : null;
   }
 
-  feature.geometry.coordinates.forEach((ring, index) => {
+  const buildingGeometry = createBuildingGeometry(feature.geometry, buildingHeight);
 
-    if (index === 0) {
-      oRingElement = ring.map(x => {
+  var colors = new Uint8Array(buildingGeometry.attributes.normal.array.length);
 
-        return new THREE.Vector2( origin[0] - wgs2MercX(x[0]), (origin[1] - wgs2MercY(x[1])));
-      });
-      buildingFootprint = new THREE.Shape(oRingElement);
-    } else {
-      // these all are the inner rings of the polygon and therefore holes
-      buildingFootprint.holes.push(new THREE.Path(ring.map(x => {
-        return new THREE.Vector2( origin[0] - wgs2MercX(x[0]), (origin[1] - wgs2MercY(x[1])))
-      })));
-    }
-
-  });
-
-  const temp = new THREE.ExtrudeBufferGeometry(buildingFootprint, {
-    depth: buildingHeight,
-    bevelEnabled: false
-  });
-
-  // const bufferGeometry = new THREE.BufferGeometry();
-
-  // bufferGeometry.addAttribute( 'position', new THREE.BufferAttribute( temp.attributes.position.array, 3 ) );
-
-
-  // console.log(temp.attributes.normal.array.length)
-
-  var colors = new Uint8Array(temp.attributes.normal.array.length);
-
-  // colors.fill(100);
-  // var buildingCol = Math.floor(Math.random()*(255-1+1)+1);
-  for(let i = 0; i < temp.attributes.normal.array.length;i=i+3){
-
-    // colors[i] = Math.floor(Math.random()*(255-1+1)+1); //255;
-    // colors[i+1] = Math.floor(Math.random()*(255-1+1)+1); //  66;
-    // colors[i+2] = Math.floor(Math.random()*(255-1+1)+1); //170;
-
-    // colors[i] =86;
-    // colors[i+1] = 160;
-    // colors[i+2] = 197;
-
+  for(let i = 0; i < buildingGeometry.attributes.normal.array.length;i=i+3){
     colors[i] = buildingCol.r;
     colors[i+1] = buildingCol.g;
     colors[i+2] = buildingCol.b;
-
-
   }
 
-  // console.log(colors)
+  buildingGeometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3, true) );
 
-  temp.addAttribute( 'color', new THREE.BufferAttribute( colors, 3, true) );
-
-  // console.log(colors)
-
-  // return bufferGeometry;
-
-  // return new THREE.ExtrudeBufferGeometry(buildingFootprint, {
-  //   depth: buildingHeight,
-  //   bevelEnabled: false
-  // });
-
-  return temp;
+  return buildingGeometry;
 
 }
 
@@ -229,11 +218,10 @@ const createBuilding = (feature, origin, buildingHeight, buildingCol) =>{
 createDataTile = (data) => {
 
   const tile = data.tile;
-  let buildingHeight = 6;
-  let buildingColor = { r: 255, g:255 , b:255 };// r: 252, g:253 , b:253    r: 255, g:255 , b:255
-  const buildingMaterial = new THREE.MeshLambertMaterial({color: 0xFFFFFF});
-  // console.log(buildingMaterial)
 
+  // Standard building properties
+  let buildingHeight = 6;
+  let buildingColor = { r: 255, g:255 , b:255 }; // r: 252, g:253 , b:253    r: 255, g:255 , b:255
 
   loadData(tile.link,'json', (features) => {
 
@@ -242,22 +230,18 @@ createDataTile = (data) => {
     var t0 = performance.now();
 
     features.features.forEach(feature => {
-        if (feature.geometry.type === 'Polygon') {
-          // var buildingCol = Math.floor(Math.random()*(255-1+1)+1);
-          geometries.push(createBuilding(feature, tile.tileMiddle, buildingHeight, buildingColor));
-        }
+      // console.log(feature)
+      if (feature.geometry.type !== 'Polygon') return;
+
+      // var buildingCol = Math.floor(Math.random()*(255-1+1)+1);
+      geometries.push(createBuilding(feature, tile.tileMiddle, buildingHeight, buildingColor));
+
     });
-
-
-
     var t1 = performance.now();
+
     // console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 
     const geometry = THREE.BufferGeometryUtils.mergeBufferGeometries(geometries);
-
-
-
-    // console.log(geometry)
 
     const res = {
       data: data,

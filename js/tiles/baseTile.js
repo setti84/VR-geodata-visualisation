@@ -1,18 +1,13 @@
 class BaseTile extends Tile {
   // BaseMapTile are square flat polygons with with a rendered map as a texture
 
-  constructor(id,origin, coords) {
+  constructor(id,origin, coords, zoom) {
 
-    super(id,origin, coords);
-    // const bounds = this.bounds = this.tileBounds();
-    // this.tileMiddle = this.gettileMiddle(bounds);
-    // this.calculateDistanceToOrigin(origin);
+    super(id,origin, coords, zoom);
+
     const bounds = this.bounds = this.tileBounds();
     this.tileMiddle = this.gettileMiddle(bounds);
     this.calculateDistanceToOrigin(origin);
-    // console.log( this.tileMiddle)
-    // console.log(JSON.stringify(origin))
-    // console.log(bounds)
 
   }
 
@@ -23,31 +18,31 @@ class BaseTile extends Tile {
     this.threeScene = map.get().threeScene;
 
     const x = this.tileCoords[0];
-    const y = (Math.pow(2, this.origin.zoom) - 1) - this.tileCoords[1];
+    const y = (Math.pow(2, this.zoom) - 1) - this.tileCoords[1];
     const s = 'abcd'[(x + y) % 4];
 
     // TODO: Tiles from codefor and link4 not working
     // https://leaflet-extras.github.io/leaflet-providers/preview/
-    const link1 = `https://api.tiles.mapbox.com/v4/setti.411b5377/${this.origin.zoom}/${x}/${y}.png` +
+    const link1 = `https://api.tiles.mapbox.com/v4/setti.411b5377/${this.zoom}/${x}/${y}.png` +
       '?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A';
-    const link2 = `http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${this.origin.zoom}/${y}/${x}`;
-    const link3 = `https://a.basemaps.cartocdn.com/light_nolabels/${this.origin.zoom}/${x}/${y}.png`;
-    const link = `https://${s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/${this.origin.zoom}/${x}/${y}.png`;
-    const link5 = `https://tiles.codefor.de/berlin-2018/${this.origin.zoom}/${x}/${y}.png`;
-    const link6 = `https://a.tile.openstreetmap.se/hydda/base/${this.origin.zoom}/${x}/${y}.png`;
+    const link2 = `http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${this.zoom}/${y}/${x}`;
+    const link3 = `https://a.basemaps.cartocdn.com/light_nolabels/${this.zoom}/${x}/${y}.png`;
+    const link = `https://${s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/${this.zoom}/${x}/${y}.png`;
+    const link5 = `https://tiles.codefor.de/berlin-2018/${this.zoom}/${x}/${y}.png`;
+    const link6 = `https://a.tile.openstreetmap.se/hydda/base/${this.zoom}/${x}/${y}.png`;
 
     const messageData = {
       type: 'baseTile',
       id: this.id,
-      zoom :this.origin.zoom,
+      zoom :this.zoom,
       mercator: this.origin.wgs2Mercator(),
       tileCoords: this.tileCoords,
       bounds: this.bounds,
       tileMiddle: this.tileMiddle,
-      link: link,
+      link: link1,
       x: x,
       y: y,
-      debugging: map.get().debugging
+      debugging: map.get().status.debugging
 
     };
 
@@ -89,7 +84,7 @@ class BaseTile extends Tile {
 
   tileBounds(){
     // "Returns bounds of the given tile in EPSG:900913 coordinates"
-    const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,this.origin.zoom));
+    const res = 2 * Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,this.zoom));
 
     //order minX,maxX,minYmaxY
 
@@ -112,28 +107,35 @@ class BaseTile extends Tile {
 
   destroy() {
 
-    // TODO: try to aboard loading if tile is still in loading state
-
-    if(this.state === 'blank'){
-
-    }else if(this.state === 'loading' || this.state === 'loaded') {
-
-      const waiting = setInterval(() => {
-
-        if (this.state === 'loaded') {
-          map.get().mapTiles.remove(this.mesh);
-          this.texture.dispose();
-          this.mesh.material.dispose();
-          this.mesh.geometry.dispose();
-
-          if (DEBUGGING) {
-            // this.tileText.parentNode.removeChild(this.tileText);
-          }
-          clearTimeout(waiting);
-        }
-      }, 200);
-
+    if(this.texture){
+      this.texture.dispose();
     }
+    if(this.mesh){
+      map.get().mapTiles.remove(this.mesh);
+      this.mesh.material.dispose();
+      this.mesh.geometry.dispose();
+    }
+
+    // if(this.state === 'blank'){
+    //
+    // }else if(this.state === 'loading' || this.state === 'loaded') {
+    //
+    //   const waiting = setInterval(() => {
+    //
+    //     if (this.state === 'loaded') {
+    //       map.get().mapTiles.remove(this.mesh);
+    //       this.texture.dispose();
+    //       this.mesh.material.dispose();
+    //       this.mesh.geometry.dispose();
+    //
+    //       if (DEBUGGING) {
+    //         // this.tileText.parentNode.removeChild(this.tileText);
+    //       }
+    //       clearTimeout(waiting);
+    //     }
+    //   }, 200);
+    //
+    // }
 
   }
 

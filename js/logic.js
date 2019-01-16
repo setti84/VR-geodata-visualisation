@@ -1,3 +1,4 @@
+
 let map;
 
 const init = () => {
@@ -8,13 +9,21 @@ const init = () => {
 
 //   {lat: 52.54591, lng: 13.35591}   //Berlin beuth
 //   {lat: 40.72372, lng: -73.98922}   New York
+//   {lat: 40.770141, lng: -73.974895}   New York central Park
 //   {lat:1.29422, lng: 103.85411}     Singapore
 //   {lat:-46.63604, lng: -23.54887}   Sao Paulo
 //   {lat: 52.54081, lng: 12.994}      Elstal
+//   {lat: 25.197139, lng: 55.274111}  dubai
+//   {lat: 3.157, lng: 101.713}  Petronas Tower Malaisia
+//   {lat: 22.3047, lng: 114.1767}  Hong Kong
+//   {lat: -6.1405, lng: -81.1669}  südlich Equador
+
+
+
 
   map = new MapApp({
-    zoom: 16,
-    position: {lat: 52.5459, lng: 13.35591} ,
+    zoom: 18,
+    position:  {lat: 52.54591, lng: 13.35591},
     debugging: false,
   });
 
@@ -38,19 +47,10 @@ const init = () => {
 
   addStats();
 
+  // setTimeout( () => {
+  //   map.setPosition(-23.54887, -46.63604)
+  // }, 3000)
+
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
-
-const changeCoordinatesDisplay = (cam) => {
-
-  document.getElementById('text').innerText = "Cam Pos Origin in WGS: " + cam.originlatLon + "\n "
-    + "Cam Pos Origin in Mercator: " + cam.originMercator + "\n "
-    + "Cam Pos Origin in Tile: " + cam.originlatLon.googleTiles() + "\n "
-    + "------------------------------------------------------------------------------\n "
-    + "New Pos in WGS: " + cam.newLatLng + "\n "
-    + "New Pos in Mercator: " + cam.newLatLng.wgs2Mercator() + "\n "
-    + "New Pos in Tile: " + cam.newLatLng.googleTiles() + "\n ";
-
-}

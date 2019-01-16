@@ -1,8 +1,8 @@
 class DataTile extends Tile {
   // BaseMapTile are square flat polygons with with a rendered map view as a texture
 
-  constructor(id,origin, coords) {
-    super(id,origin, coords);
+  constructor(id,origin, coords, zoom) {
+    super(id,origin, coords, zoom);
     this.bounds = this.tileBounds();
     this.tileMiddle = this.gettileMiddle();
     this.calculateDistanceToOrigin(origin);
@@ -24,28 +24,31 @@ class DataTile extends Tile {
 
     const mapOrigin = this.origin.wgs2Mercator();
     const x = this.tileCoords[0];
-    const y = (Math.pow(2, OSMB_TILE_ZOOM) - 1) - this.tileCoords[1];
+    const y = (Math.pow(2, this.zoom) - 1) - this.tileCoords[1];
     const s = 'abcd'[(x + y) % 4];
 
     this.size = this.bounds[1] - this.bounds[0];
     this.pos = [mapOrigin[0] - this.tileMiddle[0], mapOrigin[1] - this.tileMiddle[1]];
 
+    let user = 'anonymous';
+    if(config) user = config.osmbuildings;
+
     // const test = 'http://localhost/VR-geodata-visualisation/data/osmbTile.json';
     // https://a.data.osmbuildings.org/0.2/anonymous/tile/17/70397/42970.json
-    // const link = `https://${s}.data.osmbuildings.org/0.2/anonymous/tile/${OSMB_TILE_ZOOM}/${x}/${y}.json`;
-    const link = `https://${s}.data.osmbuildings.org/0.2/anonymous/tile/${OSMB_TILE_ZOOM}/${x}/${y}.json`;
+    // const link = `https://${s}.data.osmbuildings.org/0.2/anonymous/tile/${this.zoom}/${x}/${y}.json`;
+    const link = `https://${s}.data.osmbuildings.org/0.2/${user}/tile/${this.zoom}/${x}/${y}.json`;
 
     const messageData = {
       type: 'dataTile',
       id: this.id,
-      zoom :OSMB_TILE_ZOOM,
+      zoom :this.zoom,
       tileCoords: this.tileCoords,
       bounds: this.bounds,
       tileMiddle: this.tileMiddle,
       link: link,
       x: x,
       y: y,
-      debugging: map.get().debugging
+      debugging: map.get().status.debugging
     };
 
     map.get().workerPool.postMessage(messageData);
@@ -57,34 +60,23 @@ class DataTile extends Tile {
     // somehow the worker sends 2 meessages back. One with the response and the other one is empty. We dont consider the empty answer
     if(data.vertices.length === 0) return;
 
+    if(map.get().status.busy === 'moving'){
+      setTimeout( () => {
+        // console.log('bin bei waiting')
+        this.receiveData(data)
+      },100)
+      return;
+    }
+
     // console.log(data)
     const tile = data.data.tile;
 
-
-    /*
-
-    From there Three.js will compile and run your shaders attached to the mesh to which you give that material.
-    It doesn’t get much easier than that really. Well it probably does, but we’re talking about 3D running in your browser so
-    I figure you expect a certain amount of complexity.
-
-    We can actually add two more properties to our MeshShaderMaterial: uniforms and attributes. They can both take vectors,
-    integers or floats but as I mentioned before uniforms are the same for the whole frame, i.e. for all vertices,
-    so they tend to be single values. Attributes, however, are per- vertex variables, so they are expected to be an array.
-    There should be a one- to-one relationship between the number of values in the attributes array and the number of vertices in the mesh.
-
-*/
     const geometry = new THREE.BufferGeometry();
     geometry.addAttribute( 'position', new THREE.BufferAttribute( data.vertices, 3 ) );
     geometry.addAttribute( 'normal', new THREE.BufferAttribute( data.normal, 3 ) );
     geometry.addAttribute( 'color', new THREE.BufferAttribute( data.color, 3 , true) );
-    // console.log(geometry)
 
-    // this.buildingMaterial = new THREE.MeshLambertMaterial({color: 0x56a0c5}); // blue: 0x56a0c5 0xcac8d2 gray: fcfdfd color: 0xFFFFFF,
     this.buildingMaterial = new THREE.MeshLambertMaterial({  vertexColors: THREE.VertexColors});
-     //{  vertexColors: THREE.VertexColors}
-    // this.buildingMaterial = new THREE.MeshStandardMaterial({color: 0x56a0c5}); //  0xcac8d2
-    // this.buildingMaterial = new THREE.MeshBasicMaterial({color: 0x56a0c5}); //  0xcac8d2
-    // this.buildingMaterial = new THREE.MeshPhysicalMaterial({color: 0x56a0c5}); //  0xcac8d2
 
     this.buildingMaterial.transparent = true;
     this.buildingMaterial.opacity = 0;
@@ -97,13 +89,9 @@ class DataTile extends Tile {
       shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', THREE.ShaderChunk.begin_vertex + '\ntransformed.z = transformed.z*amplitude;\n' )
       this.materialShader = shader;
       this.blendIn();
-      // console.log(shader)
 
     };
 
-    // console.log(this.buildingMaterial)
-
-    // this.mesh = new THREE.Mesh(geometry, {vertexColors: THREE.FaceColors}); //this.buildingMaterial   {vertexColors: THREE.VertexColors}
     this.mesh = new THREE.Mesh(geometry);
     this.mesh = new THREE.Mesh(geometry, this.buildingMaterial);
     this.mesh.rotation.x = -Math.PI / 2; // 90 degree
@@ -111,38 +99,24 @@ class DataTile extends Tile {
     this.mesh.material.side = THREE.DoubleSide;
     this.mesh.position.set(-1*this.pos[0], 1, this.pos[1]);
 
-    const chunks = 4;
-    const posLength = data.vertices.length/3/chunks;
-    let start=0;
-    let endPos=posLength;
-
-    let i = 1;
-    let timeoutTime = 200;
-
     // TODO cancel all timeouts on destroy
-    // TOOD: first call doesnt need timeout
+    // const chunks3 = (this.mesh.geometry.attributes.position.count%2)? 4:5;
 
-    // map.get().dataTiles.add(this.mesh);
-    setTimeout(() =>{
-      geometry.setDrawRange( 0, endPos );
-      endPos=(posLength*(i+1))+(1*i);
-      map.get().dataTiles.add(this.mesh);
-      setTimeout(() =>{
-        i++;
-        geometry.setDrawRange( 0, endPos );
-        endPos=(posLength*(i+1))+(1*i);
-        setTimeout(() =>{
-          i++;
-          geometry.setDrawRange( 0, endPos )
-          endPos=(posLength*(i+1))+(1*i);
-          setTimeout(() =>{
-            i++;
-            geometry.setDrawRange( 0, endPos )
-            endPos=(posLength*(i+1))+(1*i);
-          }, timeoutTime);
-        }, timeoutTime);
-      }, timeoutTime);
-    }, timeoutTime);
+    let loop = 0;
+    // amount of vertices to put on the map is calculated in either 4 or 6 portions(depending on tile size), take even numbers
+    const chunks = this.zoom === 17? 4:6;
+    const chunkVertices = this.mesh.geometry.attributes.position.count/chunks;
+    let vertices = 0;
+
+    this.chunkIntervall = setInterval( () => {
+      if(map.get().status.busy !== 'moving'){
+        if(loop === 0) map.get().dataTiles.add(this.mesh);
+        loop++;
+        vertices+=chunkVertices;
+        geometry.setDrawRange( 0, vertices );
+        loop === chunks ? clearInterval(this.chunkIntervall):false;
+      }
+    },200);
 
     if(tile.debugging){
       const geometryBox = new THREE.BoxGeometry( 10, 10, 10 );
@@ -161,21 +135,18 @@ class DataTile extends Tile {
 
       this.materialShader.uniforms.amplitude.value += 0.02;
       this.materialShader.uniforms.amplitude.value >= 1 ? clearInterval(height): false;
-
     }, 20);
 
     const opacity = setInterval( () => {
-
       this.buildingMaterial.opacity += 0.05;
       this.buildingMaterial.opacity >= 1 ? clearInterval(opacity): false;
-
     }, 20);
 
   }
 
   tileBounds(){
     // "Returns bounds of the given tile in EPSG:900913 coordinates"
-    const res = 2*Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,OSMB_TILE_ZOOM));
+    const res = 2*Math.PI*EARTH_RADIUS_IN_METERS/TILE_SIZE/(Math.pow(2,this.zoom));
 
     //order minX,maxX,minYmaxY
     return [

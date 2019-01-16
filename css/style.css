@@ -11,17 +11,6 @@ body {
   overflow: hidden;
 }
 
-#text {
-  background: black;
-    position: absolute;
-    left: 35%;
-    top: 20px;
-    border-radius: 10px;
-    z-index: 10;
-    color: white;
-    padding: 10px;
-}
-
 .map-button-parent {
   position: absolute;
   bottom: 20px;
@@ -32,18 +21,22 @@ body {
 }
 
 #map-button-parent-zoom {
-  left: 10px;
+  right: 10px;
 }
 
 #map-button-parent-rotate {
-  left: 60px;
+  left: 10px;
 }
 
 #map-button-parent-tilt {
-  left: 110px;
+  right: 10px;
+  bottom: 130px;
 }
 
 .map-button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
   cursor: pointer;
   height: 40px;
   width: 40px;
