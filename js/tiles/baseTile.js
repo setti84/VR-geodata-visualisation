@@ -25,10 +25,6 @@ class BaseTile extends Tile {
     // https://leaflet-extras.github.io/leaflet-providers/preview/
     const link1 = `https://api.tiles.mapbox.com/v4/setti.411b5377/${this.zoom}/${x}/${y}.png` +
       '?access_token=pk.eyJ1Ijoic2V0dGkiLCJhIjoiNmUyMDYzMjlmODNmY2VhOGJhZjc4MTIzNDJiMjkyOGMifQ.hdPIqIoI_VJ_RQW1MXJ18A';
-    const link2 = `http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${this.zoom}/${y}/${x}`;
-    const link3 = `https://a.basemaps.cartocdn.com/light_nolabels/${this.zoom}/${x}/${y}.png`;
-    const link = `https://${s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/${this.zoom}/${x}/${y}.png`;
-    const link5 = `https://tiles.codefor.de/berlin-2018/${this.zoom}/${x}/${y}.png`;
     const link6 = `https://a.tile.openstreetmap.se/hydda/base/${this.zoom}/${x}/${y}.png`;
 
     const messageData = {
@@ -116,73 +112,6 @@ class BaseTile extends Tile {
       this.mesh.geometry.dispose();
     }
 
-    // if(this.state === 'blank'){
-    //
-    // }else if(this.state === 'loading' || this.state === 'loaded') {
-    //
-    //   const waiting = setInterval(() => {
-    //
-    //     if (this.state === 'loaded') {
-    //       map.get().mapTiles.remove(this.mesh);
-    //       this.texture.dispose();
-    //       this.mesh.material.dispose();
-    //       this.mesh.geometry.dispose();
-    //
-    //       if (DEBUGGING) {
-    //         // this.tileText.parentNode.removeChild(this.tileText);
-    //       }
-    //       clearTimeout(waiting);
-    //     }
-    //   }, 200);
-    //
-    // }
-
   }
 
 }
-
-
-
-// showTileNumber(pos, x, y) {
-//   // visualisation of the tilenumber on top of the tile -> debugging
-//
-//   this.tileText = document.createElement('a-text');
-//   const scale = 15;
-//   const text = "G: " + x + "/" + y +
-//     "\n TMS: " + this.tileCoords[0] + "/" + this.tileCoords[1] +
-//     "\n Zoom: " + this.origin.zoom;
-//
-//   this.tileText.setAttribute('position', {x: -1 * pos[0], y: 0.5, z: pos[1]});
-//   this.tileText.setAttribute('align', 'center');
-//   this.tileText.setAttribute('value', text);
-//
-//   this.tileText.setAttribute('scale', {x: scale, y: scale, z: scale});
-//   this.tileText.setAttribute('color', 'black');
-//   this.tileText.setAttribute('side', 'double');
-//   this.tileText.setAttribute('rotation', {x: -90, y: 0, z: 0});
-//
-//   this.scene.appendChild(this.tileText);
-//
-// }
-
-
-
-// if (map.get().debugging) {
-//   // this.showTileNumber(pos, x, y);  still in a frame mode
-//   // size = Math.floor(this.bounds[1] - this.bounds[0]); // recognise tile gaps
-// }
-
-// map.textureManager.loadTexture(link4).then(res => {
-//
-//   // TODO: update distance from tile to camera and check if tile is still needed, otherwise destroy texture
-//
-//   this.texture = res;
-//   // console.log(new THREE.MeshBasicMaterial({map: this.texture}))
-//   this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(size, size), new THREE.MeshBasicMaterial({map: this.texture}));
-//
-//   this.mesh.rotation.x = -Math.PI / 2; // 90 degree
-//   this.mesh.position.set(-1 * pos[0], 0, pos[1]);
-//   // map.get().mapTiles.add(this.mesh)
-//   // this.state = 'loaded'
-//
-// }).catch(err => console.log(err));

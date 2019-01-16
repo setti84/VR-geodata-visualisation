@@ -18,9 +18,6 @@ const init = () => {
 //   {lat: 22.3047, lng: 114.1767}  Hong Kong
 //   {lat: -6.1405, lng: -81.1669}  südlich Equador
 
-
-
-
   map = new MapApp({
     zoom: 18,
     position:  {lat: 52.54591, lng: 13.35591},
@@ -43,14 +40,10 @@ const init = () => {
       script.src = '//mrdoob.github.io/stats.js/build/stats.min.js';
       document.head.appendChild(script);
     })()
-  }
+  };
 
   addStats();
 
-  // setTimeout( () => {
-  //   map.setPosition(-23.54887, -46.63604)
-  // }, 3000)
-
-}
+};
 
 document.addEventListener("DOMContentLoaded", init);

@@ -38,12 +38,6 @@ class VrMode {
 
   start(){
 
-    // TODO: set new tile loading strategy? less tiles loading
-    // get controller
-    // add event listener
-    // add controler arrow
-    // add controller picture
-
     window.addEventListener("gamepadconnected", (e) => {
       e.gamepad.buttons.forEach( (button) => {
         this.gamepadConnected = true;
@@ -76,13 +70,3 @@ class VrMode {
   }
 
 }
-
-/*
-
-    // var geometry = new THREE.BufferGeometry();
-    // geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 1 ], 3 ) );
-    // geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
-    // var material = new THREE.LineBasicMaterial( { vertexColors: true, blending: THREE.AdditiveBlending } );
-    // this.controller1.add(new THREE.Line( geometry, material ));
-
-*/

@@ -6,19 +6,16 @@ class MapApp {
     this.zoom = options.zoom || 16;
     this.mapHeight = 1400;
     this.position = new LatLng(options.position.lat, options.position.lng, this.zoom) || new LatLng( 52.545, 13.355, this.zoom);
-    // this.debugging = options.debugging || false;
     this.debugging = {};
 
     this.threeScene = null;
     this.threeCamera = null;
     this.threeRenderer = null;
     this.threeLight = {};
-    // this.ground = null;
     this.initScene();
 
     this.vrMode = new VrMode();
     this.events = new Events();
-    // this.textureManager = new TextureManager();
     this.cam = new MapCamera(new LatLng(0, 0, this.zoom), this.threeCamera);
     this.workerPool = new Workerpool();
 
@@ -41,8 +38,7 @@ class MapApp {
 
     this.threeRenderer.setAnimationLoop( () =>{
       this.animationLoop();
-    } );
-
+    });
 
   }
 
@@ -52,8 +48,6 @@ class MapApp {
     if(this.status.busy === 'startLoading'){
       this.status.busy = 'idle';
     }
-
-    // console.log(this.status)
 
     if(this.status.vr && this.vrMode.gamepadConnected){
       this.vrMode.handleController();
@@ -66,32 +60,12 @@ class MapApp {
   setPosition( lat, lng){
 
     lat = util.clamp(lat,-89,89);
-    lng = util.clamp(lng,-179,179)
-    // if(lat < -80 || lat > 80 || lng < -180 || lng > 180) return;
+    lng = util.clamp(lng,-179,179);
 
     const newPos = new THREE.Vector3(Math.floor(util.wgs2MercX(lng)) ,0, Math.floor(util.wgs2MercY(lat))*-1);
     this.events.emit('CAMPOS_ON_SURFACE_MOVE', newPos);
     this.controls.moveMap(newPos);
     this.controls.update();
-
-
-    // console.log(JSON.stringify(this.cam.originlatLon.lng))
-
-    // neue position in mercator
-
-    // const oldPos = { x: Math.floor(util.wgs2MercX(this.cam.originlatLon.lng)) , z: Math.floor(util.wgs2MercY(this.cam.originlatLon.lat)) };
-    // console.log(oldPos);
-    // console.log(newPos);
-    // const delta = { x: Math.floor(newPos.x - oldPos.x) , z: Math.floor(newPos.y - oldPos.y)};
-
-    // const delta = {x: Math.floor(Math.sqrt(Math.pow(oldPos.x,2) - Math.pow(newPos.x,2))) , y: Math.sqrt( Math.pow(oldPos.y,2) - Math.pow(newPos.y,2))}
-
-    // console.log('before: ' + JSON.stringify(this.threeCamera.position));
-
-    // this.threeCamera.position.setY(1);
-    // console.log(JSON.stringify(this.cam.camPosOnSurface));
-    // this.threeCamera.position.set({x: this.threeCamera.position.x , y: this.threeCamera.position.y, z: this.threeCamera.position.z });
-    // console.log('after: ' + JSON.stringify(this.threeCamera.position));
 
   }
 
@@ -111,29 +85,20 @@ class MapApp {
   addEvents() {
 
     this.events.on('MAP_URL_CHANGE', position => {
-      // console.log('map url change')
       window.location.hash = `${position}`;
     });
-
 
     // paning
     this.events.on('CAMPOS_ON_SURFACE_MOVE', target => {
 
-      // console.log(JSON.stringify(this.threeCamera.position));
-
       this.events.emit('CAM_VIEW_CHANGE');
 
-      // console.log(target)
-
       this.cam.setPosition(target);
-      // this.threeLight.pointLight.position.set(this.cam.camPosOnSurface.x, 300, this.cam.camPosOnSurface.z)
-      // this.ground.position.set(this.cam.camPosOnSurface.x, -1, this.cam.camPosOnSurface.z);
       this.raycastFrame.position.set(this.cam.camPosOnSurface.x, this.raycastFrame.position.y, this.cam.camPosOnSurface.z);
 
       if(this.status.debugging){
-        // this.debugging.camCube.position.set(this.cam.camPosOnSurface.x, this.cam.camPosOnSurface.y, this.cam.camPosOnSurface.z);
-
-        // this.threeLight.pointLightHelper.position.set(this.cam.camPosOnSurface.x, 300, this.cam.camPosOnSurface.z);
+        this.debugging.camCube.position.set(this.cam.camPosOnSurface.x, this.cam.camPosOnSurface.y, this.cam.camPosOnSurface.z);
+        this.threeLight.pointLightHelper.position.set(this.cam.camPosOnSurface.x, 300, this.cam.camPosOnSurface.z);
       }
 
     });
@@ -143,11 +108,6 @@ class MapApp {
     this.events.on('CAM_VIEW_CHANGE',() => {
       this.cam.updateRaycaster();
 
-
-      // this.tiles.noName();
-      // console.log('init update map');
-      // console.log(this.threeCamera.position.y);
-
     });
 
     // **************** MAP HEIGHT *******************
@@ -156,12 +116,10 @@ class MapApp {
       if(this.mapHeight > this.controls.maxDistance ) return;
 
       this.mapHeight = this.mapHeight+change.deltaY;
-      // console.log('Cameraheight : ' + this.threeCamera.position.y)
-      // console.log(change)
-      // console.log('zoom change')
     });
 
     this.events.on('MAP_HEIGHT_SET', change => {
+
       this.controls.setDolly(change);
       this.events.emit('MAP_STATUS_BUSY', 'moving');
       // timeout fakes end of button use
@@ -169,6 +127,7 @@ class MapApp {
         this.events.emit('MAP_STATUS_BUSY', 'idle');
         this.events.emit('CAM_VIEW_CHANGE');
       },100);
+
     });
 
     // **************** MAP TILT *******************
@@ -206,8 +165,6 @@ class MapApp {
     // map movement starts
     this.events.on('MAP_STATUS_BUSY', (state) => {
       this.status.busy = state;
-
-      // console.log(`set Map status: ${state}`)
     });
 
     this.events.on('HANDLE_VR', event => {
@@ -221,14 +178,6 @@ class MapApp {
         this.vrMode.start();
       }
     });
-
-    // this.events.on('VR_MOVE_CAMERA', change => {
-    //   this.controls.setRotation(change);
-    // });
-    //
-    // this.events.on('VR_MOVE', change => {
-    //   this.controls.setRotation(change);
-    // });
 
     document.getElementById('mapzoom-plus').addEventListener('click', () => this.events.emit('MAP_HEIGHT_SET', -53) );
     document.getElementById('mapzoom-minus').addEventListener('click', () => this.events.emit('MAP_HEIGHT_SET', 53));
@@ -245,76 +194,14 @@ class MapApp {
       this.events.emit('HANDLE_VR', event)
     }, false );
 
-    // window.addEventListener( 'click', ( event ) => {
-    //   console.log(event)
-    //   // console.log(window.innerHeight)
-    //   console.log(this.cam.frustumPosition)
-    // }, false );
-
 
   }
 
-  // getZoom(){
-  //   return this.zoom;
-  // }
-  //
-  //
-  // setZoom(zoom){
-  //
-  //   if (this.zoom !== zoom) {
-  //     this.zoom = zoom;
-  //   }
-  //
-  // }
-
   getCamerHeight(){
 
-    // this.mapHeight = 3000000;
+    // find a way to generate camera height
 
     this.mapHeight = 500;
-
-
-    // function onWindowResize( event ) {
-    //
-    //   camera.aspect = window.innerWidth / window.innerHeight;
-    //
-    //   // adjust the FOV
-    //   camera.fov = ( 360 / Math.PI ) * Math.atan( tanFOV * ( window.innerHeight / windowHeight ) );
-    //
-    //   camera.updateProjectionMatrix();
-    //   camera.lookAt( scene.position );
-    //
-    //   renderer.setSize( window.innerWidth, window.innerHeight );
-    //   renderer.render( scene, camera );
-    //
-    // }
-
-
-    // this.mapHeight = (-220*this.zoom)+4380;
-
-
-      // switch(zoom) {
-      //
-      // case 20:
-      //   this.mapHeight = 425;
-      //   break;
-      // case 19:
-      //   this.mapHeight = 850;
-      //   break;
-      // case 18:
-      //   this.mapHeight = 1375;
-      //   break;
-      // case 17:
-      //   this.mapHeight = 1800;
-      //   break;
-      // case 16:
-      //   this.mapHeight = 2225;
-      //   break;
-      //
-      // }
-      //
-      // console.log(this.mapHeight)
-
 
   }
 
@@ -323,7 +210,6 @@ class MapApp {
     this.getCamerHeight();
 
     this.threeScene = new THREE.Scene();
-    // this.threeScene.fog = new THREE.FogExp2( 0xFFFFFF , 0.0004 ); // default 0.00025
 
     // this.threeScene.fog = new THREE.Fog( 0xFFFFFF , 4000,10000 ); // COLOR, NEAR, FAR
 
@@ -348,19 +234,11 @@ class MapApp {
     const maxSize = 20000000;
     this.raycastFrame = new THREE.Mesh(
       new THREE.BoxBufferGeometry( maxSize, CAMERA_MAX_FAR, maxSize), //10000, 2000, 10000
-      new THREE.MeshBasicMaterial( { visible: true, color: 0xFFFFFF, side:THREE.DoubleSide} ) // 0xFFFFFF 0xf0ff00
+      new THREE.MeshBasicMaterial( { visible: false, color: 0xf0ff00, side:THREE.DoubleSide} ) // 0xFFFFFF 0xf0ff00
     );
     this.raycastFrame.name = 'raycastFrame';
     this.raycastFrame.position.set( 0,CAMERA_MAX_FAR/2,0 );
     this.threeScene.add( this.raycastFrame );
-
-
-    // Ground
-    // this.ground = new THREE.Mesh( new THREE.PlaneBufferGeometry( maxSize, maxSize ), new THREE.MeshBasicMaterial( {color: 0xFFFFFF} ) );
-    // this.ground.name = 'ground';
-    // this.ground.rotation.x = -Math.PI / 2;
-    // this.ground.position.set( 0,-1,0 );
-    // this.threeScene.add( this.ground );
 
     // // Sky    https://threejs.org/examples/?q=sky#webgl_shaders_sky
     const theta = Math.PI * ( 0 - 0.5 ); // inclination   0.453
@@ -368,7 +246,7 @@ class MapApp {
     const sunPos = new THREE.Vector3( 400000* Math.cos( phi ) , 400000* Math.sin( phi ) * Math.sin( theta ) , 400000 * Math.sin( phi )* Math.cos( theta ) );
 
     const sky = new THREE.Sky();
-    sky.scale.setScalar( 550000 );
+    sky.scale.setScalar( 100 ); // 550000
     this.threeScene.add( sky );
 
     sky.onBeforeCompile = shader => {
@@ -382,10 +260,6 @@ class MapApp {
 
     sunSphere.visible = true;
     this.threeScene.add( sunSphere );
-
-    // lights
-    // 0xffffff kind of white
-    // 0xff0000 kind of red
 
     this.threeLight.pointLight = new THREE.PointLight( 0xffffff , 0.2);
     this.threeLight.pointLight.position.set( 0,150, 0 );
@@ -450,10 +324,6 @@ class MapApp {
       this.threeScene.add(this.dataTiles);
 
     }
-
-
-
-    // this.tiles.update(this.position)
 
     const interval = setInterval( () => {
       console.log('check')

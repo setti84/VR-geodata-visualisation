@@ -121,10 +121,7 @@ THREE.MapControls = function ( object, domElement ) {
 		scope.update();
 	};
 
-  this.moveMap = function (delta){  // {x:0,y:0,z:0}
-		// console.log(map.get().cam.camPosOnSurface);
-    // console.log(delta);
-    // console.log(delta.sub(map.get().cam.camPosOnSurface));
+  this.moveMap = function (delta){
 
     panOffset.add( new THREE.Vector3(  map.get().cam.camPosOnSurface.x*-1+ delta.x ,0 , map.get().cam.camPosOnSurface.z*-1+ delta.z));
 
@@ -181,10 +178,6 @@ THREE.MapControls = function ( object, domElement ) {
 		return function update() {
 
 			var position = scope.object.position;
-
-      // console.log(position)
-      // console.log(scope.target)
-      // console.log('-----')
 
 			offset.copy( position ).sub( scope.target );
 

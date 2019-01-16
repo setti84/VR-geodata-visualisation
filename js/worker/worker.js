@@ -73,7 +73,7 @@ createBaseTile = (data) => {
 	bottom side of a cube has normals: 0,1,0
 	*/
 	// wrong?
-    var normal = new Float32Array( [
+    const normal = new Float32Array( [
       0, 0, 1,
       0, 0, 1,
       0, 0, 1,
@@ -86,7 +86,7 @@ createBaseTile = (data) => {
     bufferGeometry.addAttribute( 'normal', new THREE.BufferAttribute( normal, 3 ) );
 
     // usr RGB values
-    var colors = new Uint8Array( [
+    const colors = new Uint8Array( [
       255,  0,  0,
       0,  255,  0,
       0,  0,  255,
@@ -98,7 +98,7 @@ createBaseTile = (data) => {
 
     bufferGeometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3) );
 
-    var uv = new Float32Array( [
+    const uv = new Float32Array( [
       0,1,
       0,0,
       1,1,
@@ -171,15 +171,6 @@ const createBuilding = (feature, origin, buildingHeight, buildingCol) =>{
 
   }
 
-  // if(tags.material){
-  //   console.log(`material: ${tags.material}`)
-  // }
-  //
-  // if(tags.color){
-  //   console.log(`material: ${tags.color}`)
-  // }
-  // console.log(tags)
-
   if (tags.hasOwnProperty('levels')) {
     buildingHeight = tags['levels']*4;
   }
@@ -188,7 +179,6 @@ const createBuilding = (feature, origin, buildingHeight, buildingCol) =>{
     buildingHeight = tags['height'];
   }
   if (tags.hasOwnProperty('color')) {
-    // console.log(`color: ${tags.color}`)
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(tags['color']);
     buildingCol = result ? {
       r: parseInt(result[1], 16),
@@ -227,19 +217,13 @@ createDataTile = (data) => {
 
     const geometries = [];
 
-    var t0 = performance.now();
-
     features.features.forEach(feature => {
-      // console.log(feature)
+
       if (feature.geometry.type !== 'Polygon') return;
 
-      // var buildingCol = Math.floor(Math.random()*(255-1+1)+1);
       geometries.push(createBuilding(feature, tile.tileMiddle, buildingHeight, buildingColor));
 
     });
-    var t1 = performance.now();
-
-    // console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 
     const geometry = THREE.BufferGeometryUtils.mergeBufferGeometries(geometries);
 
@@ -264,7 +248,6 @@ createDataTile = (data) => {
 
 self.addEventListener('message', (e) => {
 
-  // console.log(e.data.tile.type)
   const type = e.data.tile.type;
 
   if(type === 'baseTile'){

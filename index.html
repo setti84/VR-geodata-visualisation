@@ -6,7 +6,7 @@
         <title>VR 3D Map Example</title>
         <meta name="description" content="3D buildings">
         <meta name="keywords" content="3D, map, Karte, web mapping, VR, WebVR, Beuth">
-        <meta name="author" content="Sebasian Settgast">
+        <meta name="author" content="Sebastian Settgast">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="stylesheet" href="css/style.css">
@@ -23,7 +23,6 @@
         <script src="./js/worker/workerpool.js"></script>
 
         <script src="./js/events.js"></script>
-        <script src="./js/textureManager.js"></script>
         <script src="./js/mapCamera.js"></script>
         <script src="./js/point/point.js"></script>
         <script src="./js/point/latLng.js"></script>
@@ -38,16 +37,7 @@
         <script src="./js/mapApp.js"></script>
 
 
-<!--
-        <script type="x-shader/x-vertex" id="vertexShader">
-                uniform float amplitude;
-                varying vec3 vWorldPosition;
-                uniform vec3 color;
-                void main() {
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4( position.x, position.y, position.z*amplitude, 1.0 );
-                }
-            </script>
--->
+
     </head>
 
     <body>
