@@ -2,6 +2,8 @@ class MapApp {
 
   constructor(options = {}){
 
+    this.setUrlHash();
+
     this.status = { busy: 'startLoading', vr: false, debugging: options.debugging || false }; // busy: startLoading, loading, moving(includes paning,rotating, pitching),...
     this.zoom = options.zoom || 16;
     this.mapHeight = 1400;
@@ -34,7 +36,7 @@ class MapApp {
 
     }
 
-    this.setUrlHash();
+
 
     this.threeRenderer.setAnimationLoop( () =>{
       this.animationLoop();
@@ -71,14 +73,21 @@ class MapApp {
 
   setUrlHash() {
     // set hash if none is in URL
+
+    console.log(window.location.hash)
+
     if(window.location.hash.length === 0){
-      this.events.emit('MAP_URL_CHANGE', `${this.position.zoom}/${parseFloat(this.position.lat).toFixed(6)}/${parseFloat(this.position.lng).toFixed(6)}`);
-    }else {
-      // // set map on this position
-      // const position = window.location.hash;
-      // const zoomLatLng = position.split('/');
-      // this.position = new LatLng(zoomLatLng[1], zoomLatLng[2], this.zoom) || new LatLng( 52.545, 13.355, this.zoom);
-      // this.mapOriginChange();
+
+      return null;
+      // this.events.emit('MAP_URL_CHANGE', `${this.position.zoom}/${parseFloat(this.position.lat).toFixed(6)}/${parseFloat(this.position.lng).toFixed(6)}`);
+    }
+    else {
+        // // set map on this position
+        const position = window.location.hash;
+        const zoomLatLng = position.split('/');
+
+      return new LatLng(options.position.lat, options.position.lng, zoomLatLng[0].substring(1, zoomLatLng[0].length))
+
     }
   }
 
@@ -95,6 +104,7 @@ class MapApp {
 
       this.cam.setPosition(target);
       this.raycastFrame.position.set(this.cam.camPosOnSurface.x, this.raycastFrame.position.y, this.cam.camPosOnSurface.z);
+      this.ground.position.set(this.cam.camPosOnSurface.x, -1, this.cam.camPosOnSurface.z);
 
       if(this.status.debugging){
         this.debugging.camCube.position.set(this.cam.camPosOnSurface.x, this.cam.camPosOnSurface.y, this.cam.camPosOnSurface.z);
@@ -239,6 +249,14 @@ class MapApp {
     this.raycastFrame.name = 'raycastFrame';
     this.raycastFrame.position.set( 0,CAMERA_MAX_FAR/2,0 );
     this.threeScene.add( this.raycastFrame );
+
+    // Ground
+    const geometry = new THREE.PlaneBufferGeometry( maxSize, maxSize );
+    const material = new THREE.MeshBasicMaterial( {color: 0xFFFFFF, side: THREE.FrontSide} );
+    this.ground = new THREE.Mesh( geometry, material );
+    this.ground.rotation.x = -Math.PI / 2;
+    this.ground.position.set(0,-1,0);
+    this.threeScene.add( this.ground );
 
     // // Sky    https://threejs.org/examples/?q=sky#webgl_shaders_sky
     const theta = Math.PI * ( 0 - 0.5 ); // inclination   0.453
