@@ -128,7 +128,9 @@ class MapApp {
       this.cam.setPosition(target);
       // this.threeLight.pointLight.position.set(this.cam.camPosOnSurface.x, 300, this.cam.camPosOnSurface.z)
       // this.ground.position.set(this.cam.camPosOnSurface.x, -1, this.cam.camPosOnSurface.z);
-      this.raycastFrame.position.set(this.cam.camPosOnSurface.x, this.raycastFrame.position.y, this.cam.camPosOnSurface.z);
+      if(this.raycastFrame){
+        this.raycastFrame.position.set(this.cam.camPosOnSurface.x, this.raycastFrame.position.y, this.cam.camPosOnSurface.z);
+      }
 
       if(this.status.debugging){
         // this.debugging.camCube.position.set(this.cam.camPosOnSurface.x, this.cam.camPosOnSurface.y, this.cam.camPosOnSurface.z);
@@ -141,7 +143,10 @@ class MapApp {
 
     // paning, zooming, tilting,...
     this.events.on('CAM_VIEW_CHANGE',() => {
-      this.cam.updateRaycaster();
+      if(this.raycastFrame){
+        this.cam.updateRaycaster();
+      }
+
 
 
       // this.tiles.noName();
@@ -345,10 +350,10 @@ class MapApp {
     this.controls.maxDistance = CAMERA_MAX_FAR;
 
     // Raycast
-    const maxSize = 20000000;
+    const maxSize = 20000000; // const maxSize = 20000000;
     this.raycastFrame = new THREE.Mesh(
       new THREE.BoxBufferGeometry( maxSize, CAMERA_MAX_FAR, maxSize), //10000, 2000, 10000
-      new THREE.MeshBasicMaterial( { visible: true, color: 0xFFFFFF, side:THREE.DoubleSide} ) // 0xFFFFFF 0xf0ff00
+      new THREE.MeshBasicMaterial( { visible: false, color: 0xFFFFFF, side:THREE.DoubleSide} ) // 0xFFFFFF 0xf0ff00
     );
     this.raycastFrame.name = 'raycastFrame';
     this.raycastFrame.position.set( 0,CAMERA_MAX_FAR/2,0 );
@@ -362,26 +367,32 @@ class MapApp {
     // this.ground.position.set( 0,-1,0 );
     // this.threeScene.add( this.ground );
 
-    // // Sky    https://threejs.org/examples/?q=sky#webgl_shaders_sky
+    // https://threejs.org/examples/?q=sky#webgl_shaders_sky
     const theta = Math.PI * ( 0 - 0.5 ); // inclination   0.453
     const phi = 2 * Math.PI * ( 0.25 - 0.5 ); // azimuth   0.25
-    const sunPos = new THREE.Vector3( 400000* Math.cos( phi ) , 400000* Math.sin( phi ) * Math.sin( theta ) , 400000 * Math.sin( phi )* Math.cos( theta ) );
+    const sunPos = new THREE.Vector3(400000* Math.cos( phi ), 400000* Math.sin( phi ) * Math.sin( theta ),400000 * Math.sin( phi )* Math.cos( theta ))
 
     const sky = new THREE.Sky();
-    sky.scale.setScalar( 550000 );
+    sky.scale.setScalar( 20000000 );
     this.threeScene.add( sky );
 
     sky.onBeforeCompile = shader => {
       shader.uniforms.sunPosition = { value: sunPos };
     };
+
     sky.material.uniforms.sunPosition.value.set(sunPos.x, sunPos.y, sunPos.z)
 
     // Add Sun Helper
-    const sunSphere = new THREE.Mesh( new THREE.SphereBufferGeometry( 30, 16, 8 ), new THREE.MeshBasicMaterial( { color: 0xffffff } ) );
+    const sunSphere = new THREE.Mesh(
+      new THREE.SphereBufferGeometry( 30, 16, 8 ),
+      new THREE.MeshBasicMaterial( { color: 0xffffff } )
+    );
     sunSphere.position.set(sunPos.x, sunPos.y, sunPos.z);
 
     sunSphere.visible = true;
     this.threeScene.add( sunSphere );
+
+    console.log(this.threeScene)
 
     // lights
     // 0xffffff kind of white
