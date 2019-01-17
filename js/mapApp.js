@@ -246,7 +246,7 @@ class MapApp {
     const sunPos = new THREE.Vector3( 400000* Math.cos( phi ) , 400000* Math.sin( phi ) * Math.sin( theta ) , 400000 * Math.sin( phi )* Math.cos( theta ) );
 
     const sky = new THREE.Sky();
-    sky.scale.setScalar( 100 ); // 550000
+    sky.scale.setScalar( 20000000 );
     this.threeScene.add( sky );
 
     sky.onBeforeCompile = shader => {
